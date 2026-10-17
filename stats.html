@@ -53,6 +53,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--glow); outl
 .bar-fill { height: 12px; background: var(--glow); border-radius: 0 4px 4px 0; min-width: 2px; }
 .bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
 .funnel .bar-row { grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr) auto; }
+#achBars .bar-row { grid-template-columns: minmax(0, 15em) minmax(0, 1fr) auto; }
 .tablewrap { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: .88rem; font-variant-numeric: tabular-nums; }
 th, td { text-align: right; padding: 7px 10px; border-top: 1px solid var(--line); white-space: nowrap; }
@@ -123,6 +124,19 @@ th { color: var(--muted); font-weight: 400; font-size: .78rem; text-transform: u
       <div class="tablewrap"><table id="gamesTable"></table></div>
     </div>
 
+    <div class="card">
+      <h2>Dagelijkse uitdaging</h2>
+      <p class="lead">Elke dag speelt iedereen hetzelfde spel met dezelfde start. Meedoeners = apparaten die die dag de uitdaging speelden.</p>
+      <div class="tiles" id="dailyTiles" style="margin-bottom:14px"></div>
+      <div class="tablewrap"><table id="dailyTable"></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Prestaties</h2>
+      <p class="lead" id="achLead">Hoe vaak elke badge is behaald.</p>
+      <div class="bars" id="achBars"></div>
+    </div>
+
     <div class="cards">
       <div class="card"><h2>Waar bezoekers vandaan komen</h2><p class="lead">Herkomst van elk bezoek.</p><div class="bars" id="sources"></div></div>
       <div class="card"><h2>Telefoon of computer</h2><p class="lead">Apparaat van elk bezoek.</p><div class="bars" id="devices"></div></div>
@@ -164,10 +178,39 @@ th { color: var(--muted); font-weight: 400; font-size: .78rem; text-transform: u
     return data;
   }
 
-  function tile(label, value, sub, dir) {
+  async function fetchExtra(code) {
+    try {
+      const r = await fetch(SUPA.url + '/rest/v1/rpc/get_stats_extra', { method: 'POST', headers: { apikey: SUPA.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }) });
+      return r.ok ? await r.json() : null;
+    } catch (e) { return null; }
+  }
+  const ACH = { eerste: 'Eerste potje', vijf: 'Ontdekker (5 spellen)', alle: 'Alleskunner (alle 12)', scorebord: 'Op het scorebord', record: 'Beter dan ooit', gedeeld: 'Opschepper (gedeeld)',
+    dag1: 'Dagtaak', dag3: 'Volhouder (3 dagen)', dag7: 'Week vol (7 dagen)', nacht: 'Nachtbraker', marathon: 'Marathon (10 min)', honderd: 'Vaste gast (100 rondes)' };
+  const achName = k => ACH[k] || (k.startsWith('lvl-') ? (NAMES[k.slice(4)] || k.slice(4)) + ': level 5' : k);
+
+  function tile(label, value, sub, dir, box) {
     const d = el('div', 'tile'); d.append(el('span', null, label), el('b', null, value));
     if (sub) { const s = el('small', dir > 0 ? 'up' : dir < 0 ? 'down' : null, sub); d.appendChild(s); }
-    $('tiles').appendChild(d);
+    (box || $('tiles')).appendChild(d);
+  }
+
+  function renderExtra(x) {
+    $('dailyTiles').textContent = '';
+    if (!x) {
+      $('dailyTiles').appendChild(el('div', 'empty', 'Deze cijfers zijn nog niet beschikbaar.'));
+      $('dailyTable').textContent = ''; $('achBars').textContent = ''; return;
+    }
+    const box = $('dailyTiles');
+    tile('Meedoeners vandaag', nf(x.dag_vandaag), null, 0, box);
+    tile('Meedoeners laatste 7 dagen', nf(x.dag_7d), 'gemiddeld ' + (num(x.dag_7d) / 7).toLocaleString('nl-NL', { maximumFractionDigits: 1 }) + ' per dag', 0, box);
+    tile('In het dagklassement', nf(x.dag_spelers), nf(x.dag_scores) + ' dagscores in totaal', 0, box);
+    const label = d => Number(d.slice(8, 10)) + ' ' + MONTHS.at(Number(d.slice(5, 7)) - 1);
+    const since = x.dag_sinds || '9999';
+    table($('dailyTable'), ['Dag', 'Spel', 'Meedoeners', 'In klassement', 'Winnaar', 'Topscore'],
+      (x.dagen || []).filter(d => d.day >= since).map(d => [label(d.day), NAMES[d.game] || d.game || '\u2013', nf(d.meedoeners), nf(d.in_klassement), d.winnaar || '\u2013', d.topscore ? nf(d.topscore) : '\u2013']));
+    $('achLead').textContent = 'Hoe vaak elke badge is behaald. In totaal ' + nf(x.prestaties_totaal) + ' badges, door ' + nf(x.prestaties_spelers) + ' spelers (apparaten).';
+    const labels = {}; (x.prestaties || []).forEach(r => { labels[r.key] = achName(r.key); });
+    bars($('achBars'), x.prestaties || [], labels, num(x.prestaties_spelers) || undefined);
   }
   const growthText = (g, what) => g == null ? 'nog geen vergelijking' : (g >= 0 ? '+' : '') + g + '% ' + what;
 
@@ -297,6 +340,7 @@ th { color: var(--muted); font-weight: 400; font-size: .78rem; text-transform: u
       }).filter((_, i) => i <= lastWithData));
   }
   window.__renderStats = render;
+  window.__renderExtra = renderExtra;
 
   async function load(code) {
     $('gateMsg').textContent = '';
@@ -305,6 +349,7 @@ th { color: var(--muted); font-weight: 400; font-size: .78rem; text-transform: u
       store.set('nsh-stats-code', code);
       $('gate').hidden = true; $('dash').hidden = false;
       render(s);
+      renderExtra(await fetchExtra(code));
     } catch (e) {
       store.set('nsh-stats-code', null);
       $('dash').hidden = true; $('gate').hidden = false;
