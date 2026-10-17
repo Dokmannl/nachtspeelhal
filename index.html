@@ -496,6 +496,14 @@ window.rrect = function (c, x, y, w, h, r) {
     if (!r.ok) { const err = new Error((data && data.message) || ('http_' + r.status)); err.code = data && data.message; throw err; }
     return data;
   }
+  const tracking = () => useSupa && !isLocal;
+  function track(path, body) { if (tracking()) supa(path, body).catch(() => {}); }
+  let playSec = 0, roundOpen = false;
+  function sendRound(finished) {
+    if (!roundOpen) return;
+    roundOpen = false;
+    if (playSec >= 1) track('rpc/track_round', { p_game: boardId(), p_seconds: Math.round(playSec), p_level: curLevel, p_finished: finished });
+  }
   async function loadSupa() {
     try {
       const rows = await supa('top_scores?select=game,name,score,at');
@@ -778,7 +786,8 @@ window.rrect = function (c, x, y, w, h, r) {
     ensureAudio();
     input.keys.clear(); input.pressed.clear();
     curScore = -1; api().score(0);
-    resetLevel(); drawErr = '';
+    sendRound(false);
+    resetLevel(); drawErr = ''; playSec = 0; roundOpen = true;
     inst = null; inst = cur.create(api());
     overlay(null);
     beginCountdown();
@@ -790,6 +799,7 @@ window.rrect = function (c, x, y, w, h, r) {
   function finish() {
     if (state !== 'playing') return;
     state = 'over';
+    sendRound(true);
     Music.stop();
     buzz([120, 60, 220]);
     const s = curScore, prevBest = bestOf(boardId()), record = s > prevBest;
@@ -822,16 +832,17 @@ window.rrect = function (c, x, y, w, h, r) {
     $('waBtn').hidden = native;
     $('copyBtn').hidden = native;
     $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
+    $('waBtn').onclick = () => track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() });
   }
   $('shareBtn').addEventListener('click', async () => {
     if (!shareData) return;
-    try { await navigator.share(shareData); $('shareMsg').textContent = 'Gedeeld!'; }
+    try { await navigator.share(shareData); $('shareMsg').textContent = 'Gedeeld!'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); }
     catch (e) { if (e && e.name !== 'AbortError') $('shareMsg').textContent = 'Delen lukte niet. Kopieer de link hieronder.'; $('copyBtn').hidden = false; }
   });
   $('copyBtn').addEventListener('click', async () => {
     if (!shareData) return;
     const all = shareData.text + ' ' + shareData.url;
-    try { await navigator.clipboard.writeText(all); $('shareMsg').textContent = 'Link gekopieerd. Plak hem in een bericht.'; }
+    try { await navigator.clipboard.writeText(all); $('shareMsg').textContent = 'Link gekopieerd. Plak hem in een bericht.'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); }
     catch (e) { $('shareMsg').textContent = all; }
   });
 
@@ -840,6 +851,7 @@ window.rrect = function (c, x, y, w, h, r) {
     else if (state === 'paused') { overlay(null); beginCountdown(); Music.start(cur.music); cv.focus(); }
   }
   function leave() {
+    sendRound(false);
     Music.stop();
     if (fsActive()) exitFs();
     state = 'home'; inst = null; cur = null; modeId = null;
@@ -856,6 +868,7 @@ window.rrect = function (c, x, y, w, h, r) {
     store.set('nsh-name', name); lastName = name;
     $('saveBtn').disabled = true; $('saveMsg').textContent = 'Opslaan…';
     const res = await saveScore(boardId(), name, curScore);
+    if (res.where === 'shared') track('rpc/track_event', { p_kind: 'score_opgeslagen', p_game: boardId() });
     if (res.where === 'shared') $('saveMsg').textContent = res.kept != null ? `Opgeslagen. Je beste score blijft ${res.kept.toLocaleString('nl-NL')}.` : 'Je staat op het scorebord.';
     else if (res.error === 'naam_ongepast') $('saveMsg').textContent = 'Deze naam mag niet. Kies een andere naam.';
     else if (res.error === 'te_vaak') $('saveMsg').textContent = 'Je hebt net al scores ingestuurd. Probeer het over een minuut opnieuw.';
@@ -912,6 +925,7 @@ window.rrect = function (c, x, y, w, h, r) {
   });
   addEventListener('keyup', e => input.keys.delete(norm(e)));
   addEventListener('blur', () => input.keys.clear());
+  addEventListener('pagehide', () => { if (state === 'playing' || state === 'paused' || state === 'countdown') sendRound(false); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && (state === 'playing' || state === 'countdown')) togglePause(); });
 
   const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
@@ -984,6 +998,7 @@ window.rrect = function (c, x, y, w, h, r) {
       try {
         let left = elapsed;
         if (state === 'playing') {
+          playSec += elapsed;
           do { const dt = Math.min(.05, left); inst.update(dt); left -= dt; } while (left > 1e-6 && state === 'playing');
           bannerT = Math.max(0, bannerT - elapsed);
           if (goT > 0) goT = Math.max(0, goT - elapsed);
@@ -1051,9 +1066,20 @@ window.rrect = function (c, x, y, w, h, r) {
       : (!ref || ref.includes(location.hostname)) ? 'direct' : 'anders';
     const visitor = store.get('nsh-seen', false) ? 'terug' : 'nieuw';
     store.set('nsh-seen', true);
+    const now = new Date(), pad = n => String(n).padStart(2, '0');
+    const dayKey = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+    const monthKey = dayKey.slice(0, 7);
+    const th = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3 - (now.getDay() + 6) % 7);
+    const weekKey = th.getFullYear() + '-w' + (1 + Math.round(((th - new Date(th.getFullYear(), 0, 4)) / 864e5 - 3 + (new Date(th.getFullYear(), 0, 4).getDay() + 6) % 7) / 7));
+    const isNew = (k, v) => { const was = store.get(k, ''); if (was === v) return false; store.set(k, v); return true; };
+    const extra = {
+      p_lang: (navigator.language || '').slice(0, 2).toLowerCase(),
+      p_dow: (now.getDay() + 6) % 7, p_hour: now.getHours(),
+      p_new_day: isNew('nsh-dag', dayKey), p_new_week: isNew('nsh-week', weekKey), p_new_month: isNew('nsh-maand', monthKey)
+    };
     supa('rpc/count_visit', {
       p_page: linked ? deepLink : (deepLink === 'spellen' ? 'spellen' : 'home'),
-      p_device: coarse ? 'telefoon' : 'computer', p_source: source, p_visitor: visitor
+      p_device: coarse ? 'telefoon' : 'computer', p_source: source, p_visitor: visitor, ...extra
     }).catch(() => {});
   }
   schedule();

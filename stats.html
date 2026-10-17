@@ -8,7 +8,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
-/* Layout: owner dashboard. Code gate, then a row of headline tiles, a daily visits chart, and three ranked bar lists. Same night palette as the site. */
+/* Layout: owner/buyer dashboard. Code gate, headline tiles with growth, a daily chart, the funnel, a per-game table, an hour heatmap, three origin lists and a monthly table. Night palette of the site; prints on white. */
 :root {
   --night: #070b17; --panel: #0f1824; --line: #1f2e3a; --ink: #e8efe4; --muted: #8fa3a0;
   --glow: #f4d35e; --mint: #9ef0c8; --danger: #e5484d; --grid: rgba(143,163,160,.18);
@@ -21,11 +21,13 @@ body {
   margin: 0; background: var(--night); color: var(--ink); font: 15px/1.5 var(--body);
   padding: max(20px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
 }
-main { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+main { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 h1 { font-family: var(--display); font-style: italic; font-weight: 600; color: var(--glow); margin: 0; font-size: 2.2rem; }
-h2 { margin: 0 0 12px; font-size: 1.05rem; }
-.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+h2 { margin: 0 0 4px; font-size: 1.05rem; }
+.lead { margin: 0 0 12px; color: var(--muted); font-size: .88rem; }
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
 .muted { color: var(--muted); font-size: .9rem; }
+.badge { display: inline-block; border: 1px solid var(--glow); color: var(--glow); border-radius: 99px; padding: 2px 10px; font-size: .78rem; margin-left: 8px; vertical-align: middle; }
 button, input { font: inherit; color: inherit; }
 .btn { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
 .btn-main { background: var(--glow); color: var(--night); border: 0; border-radius: 99px; padding: 10px 22px; font-weight: 700; cursor: pointer; }
@@ -34,65 +36,126 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--glow); outl
 .gate { display: flex; flex-direction: column; gap: 12px; max-width: 30rem; }
 .gate form { display: flex; flex-wrap: wrap; gap: 8px; }
 #gateMsg { color: var(--danger); min-height: 1.3em; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 12px; }
 .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-.tile span { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
-.tile b { display: block; font-size: 1.8rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.tile span { display: block; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tile b { display: block; font-size: 1.75rem; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.tile small { display: block; font-size: .82rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.up { color: var(--mint) !important; } .down { color: #ff9a8a !important; }
 .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
 .chart { position: relative; width: 100%; }
 .chart svg { display: block; width: 100%; height: auto; }
-.tip { position: absolute; pointer-events: none; background: #1b2731; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: .85rem; white-space: nowrap; transform: translate(-50%, -110%); }
+.tip { position: absolute; pointer-events: none; background: #1b2731; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: .82rem; white-space: nowrap; transform: translate(-50%, -110%); z-index: 2; }
 .bars { display: flex; flex-direction: column; gap: 8px; }
-.bar-row { display: grid; grid-template-columns: minmax(0, 8.5em) minmax(0, 1fr) 3.5em; gap: 10px; align-items: center; font-size: .9rem; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 8em) minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: .9rem; }
 .bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bar-track { height: 12px; }
 .bar-fill { height: 12px; background: var(--glow); border-radius: 0 4px 4px 0; min-width: 2px; }
-.bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.funnel .bar-row { grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr) auto; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 7px 10px; border-top: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--muted); font-weight: 400; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; border-top: 0; }
+.heat { display: grid; grid-template-columns: 2.4em repeat(24, minmax(0, 1fr)); gap: 2px; font-size: .7rem; color: var(--muted); }
+.heat div { aspect-ratio: 1; border-radius: 3px; background: rgba(244,211,94,.05); }
+.heat .lbl { aspect-ratio: auto; background: none; display: flex; align-items: center; }
+.heat .hr { aspect-ratio: auto; background: none; text-align: center; }
 .empty { color: var(--muted); font-size: .9rem; }
+.note { color: var(--muted); font-size: .82rem; line-height: 1.5; }
+@media print {
+  :root { --night: #ffffff; --panel: #ffffff; --line: #d6dbe0; --ink: #111111; --muted: #555555; --glow: #c79a12; --grid: rgba(0,0,0,.12); color-scheme: light; }
+  body { padding: 0; }
+  .noprint, .gate { display: none !important; }
+  .card, .tile { break-inside: avoid; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
 </style>
 </head>
 <body>
 <main>
   <div class="top">
-    <h1>Statistieken</h1>
-    <span class="muted"><a href="./" style="color:inherit">Naar Nachtspeelhal</a></span>
+    <h1>Statistieken<span class="badge" id="roleBadge" hidden></span></h1>
+    <span class="muted noprint"><a href="./" style="color:inherit">Naar Nachtspeelhal</a></span>
   </div>
 
   <section class="gate" id="gate">
-    <p style="margin:0">Deze pagina is alleen voor de beheerder. Vul je beheercode in.</p>
+    <p style="margin:0">Deze pagina is alleen toegankelijk met een code. Vul je code in.</p>
     <form id="gateForm">
-      <label for="code" class="muted" style="align-self:center">Beheercode</label>
+      <label for="code" class="muted" style="align-self:center">Code</label>
       <input id="code" autocomplete="current-password" type="password">
       <button class="btn-main" type="submit">Openen</button>
     </form>
     <div id="gateMsg" role="status"></div>
   </section>
 
-  <div id="dash" hidden>
-    <div class="top" style="margin-bottom:16px">
+  <div id="dash" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="top">
       <span class="muted" id="asOf"></span>
-      <span style="display:flex;gap:8px"><button class="btn" id="refresh" type="button">Vernieuwen</button><button class="btn" id="logout" type="button">Uitloggen</button></span>
+      <span class="noprint" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="refresh" type="button">Vernieuwen</button><button class="btn" id="print" type="button">Rapport als PDF</button><button class="btn" id="logout" type="button">Uitloggen</button></span>
     </div>
+
     <div class="tiles" id="tiles"></div>
-    <div class="card" style="margin-top:16px">
-      <h2>Bezoeken per dag, laatste 30 dagen</h2>
+
+    <div class="card">
+      <h2>Unieke bezoekers per dag</h2>
+      <p class="lead">Laatste 30 dagen. Beweeg over een dag voor bezoeken, spelstarts en speeltijd.</p>
       <div class="chart" id="dayChart"></div>
     </div>
-    <div class="cards" style="margin-top:16px">
-      <div class="card"><h2>Populairste spellen (spelstarts)</h2><div class="bars" id="games"></div></div>
-      <div class="card"><h2>Waar bezoekers vandaan komen</h2><div class="bars" id="sources"></div><h2 style="margin-top:20px">Telefoon of computer</h2><div class="bars" id="devices"></div></div>
+
+    <div class="cards">
+      <div class="card">
+        <h2>Van bezoek tot gedeelde score</h2>
+        <p class="lead">Hoeveel van de bezoeken doorlopen elke stap.</p>
+        <div class="bars funnel" id="funnel"></div>
+      </div>
+      <div class="card">
+        <h2>Drukste momenten</h2>
+        <p class="lead">Bezoeken per dag van de week en uur, laatste 90 dagen.</p>
+        <div class="heat" id="heat"></div>
+      </div>
     </div>
-    <p class="muted" style="margin-top:16px">Geteld zonder cookies of persoonsgegevens: alleen aantallen per dag. "Nieuw" = de eerste keer dat iemand de site op dat apparaat opent.</p>
+
+    <div class="card">
+      <h2>Per spel</h2>
+      <p class="lead">Gesorteerd op aantal keer gestart.</p>
+      <div class="tablewrap"><table id="gamesTable"></table></div>
+    </div>
+
+    <div class="cards">
+      <div class="card"><h2>Waar bezoekers vandaan komen</h2><p class="lead">Herkomst van elk bezoek.</p><div class="bars" id="sources"></div></div>
+      <div class="card"><h2>Telefoon of computer</h2><p class="lead">Apparaat van elk bezoek.</p><div class="bars" id="devices"></div></div>
+      <div class="card"><h2>Taal van de bezoeker</h2><p class="lead">Taalinstelling van de browser.</p><div class="bars" id="langs"></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Maandoverzicht</h2>
+      <p class="lead">Laatste 12 maanden.</p>
+      <div class="tablewrap"><table id="monthsTable"></table></div>
+    </div>
+
+    <p class="note">Alles wordt geteld zonder cookies en zonder persoonsgegevens: alleen aantallen per dag. Een unieke bezoeker is een apparaat dat de site die dag, week of maand voor het eerst opent. Terugkerend = de bezoeker was er al eerder. Speeltijd = de tijd dat een spel echt gespeeld wordt, zonder pauzes.</p>
   </div>
 </main>
 <script>
 (() => {
   const SUPA = { url: 'https://mcakdvonmliccvqtzsuw.supabase.co', key: 'sb_publishable_N10Mu-RjANOLzRHon0ZwrQ_WX-zdJGY' };
-  const NAMES = { vuurvlieg: 'Vuurvlieg', stuiterbal: 'Stuiterbal', racebaan: 'Racebaan', sprongheld: 'Sprongheld', slang: 'Slang', 'slang-rand': 'Slang (rand)', toren: 'Torenbouwer', sterrenblokken: 'Sterrenblokken', kikkersprong: 'Kikkersprong', lantaarnman: 'Lantaarnman', uilenvlucht: 'Uilenvlucht', spokenjacht: 'Spokenjacht', home: 'Voorpagina', spellen: 'Spellenpagina' };
+  const NAMES = { vuurvlieg: 'Vuurvlieg', stuiterbal: 'Stuiterbal', racebaan: 'Racebaan', sprongheld: 'Sprongheld', slang: 'Slang', 'slang-rand': 'Slang (door de rand)', toren: 'Torenbouwer', sterrenblokken: 'Sterrenblokken', kikkersprong: 'Kikkersprong', lantaarnman: 'Lantaarnman', uilenvlucht: 'Uilenvlucht', spokenjacht: 'Spokenjacht' };
+  const LANGS = { nl: 'Nederlands', en: 'Engels', de: 'Duits', fr: 'Frans', es: 'Spaans', it: 'Italiaans', pt: 'Portugees', pl: 'Pools', tr: 'Turks', ar: 'Arabisch' };
+  const SOURCES = { direct: 'Direct', 'gedeelde link': 'Gedeelde link', google: 'Google', whatsapp: 'WhatsApp', facebook: 'Facebook', anders: 'Andere site' };
+  const DEVICES = { telefoon: 'Telefoon', computer: 'Computer' };
+  const MONTHS = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
+  const DOW = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
   const $ = id => document.getElementById(id);
-  const nf = n => Number(n || 0).toLocaleString('nl-NL');
+  const num = v => Number(v) || 0;
+  const nf = n => num(n).toLocaleString('nl-NL');
+  const pct = (a, b) => b > 0 ? Math.round(a / b * 100) : 0;
+  const mins = sec => { const m = sec / 60; return m < 10 ? m.toLocaleString('nl-NL', { maximumFractionDigits: 1 }) : Math.round(m).toLocaleString('nl-NL'); };
+  const hours = sec => (sec / 3600).toLocaleString('nl-NL', { maximumFractionDigits: 1 });
+  const growth = (now, before) => before > 0 ? Math.round((now - before) / before * 100) : null;
   const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
+  const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
 
   async function fetchStats(code) {
     const r = await fetch(SUPA.url + '/rest/v1/rpc/get_stats', { method: 'POST', headers: { apikey: SUPA.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }) });
@@ -101,68 +164,139 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--glow); outl
     return data;
   }
 
-  function tiles(t) {
-    const items = [['Bezoeken totaal', t.bezoeken], ['Laatste 7 dagen', t.bezoeken_7d], ['Nieuwe bezoekers', t.nieuw], ['Spelstarts', t.spelstarts], ['Spelers op scorebord', t.spelers], ['Berichten', t.berichten]];
+  function tile(label, value, sub, dir) {
+    const d = el('div', 'tile'); d.append(el('span', null, label), el('b', null, value));
+    if (sub) { const s = el('small', dir > 0 ? 'up' : dir < 0 ? 'down' : null, sub); d.appendChild(s); }
+    $('tiles').appendChild(d);
+  }
+  const growthText = (g, what) => g == null ? 'nog geen vergelijking' : (g >= 0 ? '+' : '') + g + '% ' + what;
+
+  function tiles(t, role) {
     $('tiles').textContent = '';
-    for (const [label, v] of items) {
-      const d = document.createElement('div'); d.className = 'tile';
-      const s = document.createElement('span'); s.textContent = label;
-      const b = document.createElement('b'); b.textContent = nf(v);
-      d.append(s, b); $('tiles').appendChild(d);
+    const gw = growth(num(t.uniek_week), num(t.uniek_vorige_week));
+    const g7 = growth(num(t.bezoeken_7d), num(t.bezoeken_prev7));
+    tile('Unieke bezoekers deze week', nf(t.uniek_week), growthText(gw, 't.o.v. vorige week'), gw);
+    tile('Unieke bezoekers deze maand', nf(t.uniek_maand), 'vandaag: ' + nf(t.uniek_vandaag));
+    tile('Bezoeken laatste 7 dagen', nf(t.bezoeken_7d), growthText(g7, 't.o.v. de 7 dagen ervoor'), g7);
+    tile('Terugkerende bezoekers', pct(num(t.dag_terug_30), num(t.dag_uniek_30)) + '%', 'van de dagelijkse bezoekers, 30 dagen');
+    tile('Speeltijd per bezoek', mins(num(t.bezoeken) ? num(t.seconden) / num(t.bezoeken) : 0) + ' min', 'gemiddeld');
+    tile('Totale speeltijd', hours(num(t.seconden)) + ' uur', nf(t.rondes) + ' gespeelde rondes');
+    tile('Spelers op het scorebord', nf(t.spelers), nf(t.opgeslagen) + ' keer een score opgeslagen');
+    tile('Scores gedeeld', nf(t.gedeeld), nf(t.via_deellink) + ' bezoeken via een gedeelde link');
+    if (role === 'eigenaar') tile('Berichten van kopers', nf(t.berichten), 'zie Supabase, tabel messages');
+  }
+
+  function bars(box, rows, labels, total) {
+    box.textContent = '';
+    if (!rows.length) { box.appendChild(el('div', 'empty', 'Nog geen gegevens.')); return; }
+    const max = Math.max(...rows.map(r => num(r.n)), 1), sum = total || rows.reduce((s, r) => s + num(r.n), 0);
+    for (const r of rows) {
+      const row = el('div', 'bar-row');
+      const track = el('div'); const fill = el('div', 'bar-fill'); fill.style.width = (num(r.n) / max * 100) + '%'; track.appendChild(fill);
+      row.append(el('span', 'name', labels[r.key] || r.key), track, el('span', 'val', nf(r.n) + ' · ' + pct(num(r.n), sum) + '%'));
+      box.appendChild(row);
     }
   }
 
-  function bars(el, rows, key, valKey) {
-    el.textContent = '';
-    if (!rows.length) { const p = document.createElement('div'); p.className = 'empty'; p.textContent = 'Nog geen gegevens.'; el.appendChild(p); return; }
-    const max = Math.max(...rows.map(r => Number(r[valKey]) || 0), 1);
-    for (const r of rows) {
-      const row = document.createElement('div'); row.className = 'bar-row';
-      const n = document.createElement('span'); n.className = 'name'; n.textContent = NAMES[r[key]] || r[key];
-      const track = document.createElement('div'); track.className = 'bar-track';
-      const fill = document.createElement('div'); fill.className = 'bar-fill'; fill.style.width = (Number(r[valKey]) / max * 100) + '%';
-      track.appendChild(fill);
-      const v = document.createElement('span'); v.className = 'val'; v.textContent = nf(r[valKey]);
-      row.append(n, track, v); el.appendChild(row);
+  function funnel(t) {
+    const box = $('funnel'); box.textContent = '';
+    const steps = [['Bezoeken', num(t.bezoeken)], ['Spel gestart', num(t.spelstarts)], ['Spel uitgespeeld', num(t.uitgespeeld)], ['Score opgeslagen', num(t.opgeslagen)], ['Score gedeeld', num(t.gedeeld)]];
+    if (!steps[0][1]) { box.appendChild(el('div', 'empty', 'Nog geen gegevens.')); return; }
+    const max = Math.max(...steps.map(s => s[1]), 1);
+    steps.forEach(([name, v], i) => {
+      const row = el('div', 'bar-row');
+      const track = el('div'); const fill = el('div', 'bar-fill'); fill.style.width = (v / max * 100) + '%'; track.appendChild(fill);
+      const per = i === 0 ? 'per bezoek' : (v / steps[0][1]).toLocaleString('nl-NL', { maximumFractionDigits: 2 }) + ' per bezoek';
+      row.append(el('span', 'name', name), track, el('span', 'val', nf(v) + (i ? ' · ' + per : '')));
+      box.appendChild(row);
+    });
+  }
+
+  function heat(rows) {
+    const box = $('heat'); box.textContent = '';
+    const m = new Map(rows.map(r => [r.key, num(r.n)]));
+    const max = Math.max(1, ...m.values());
+    const tip = el('div', 'tip'); tip.hidden = true;
+    box.appendChild(el('div', 'lbl'));
+    for (let h = 0; h < 24; h++) box.appendChild(el('div', 'hr', h % 3 === 0 ? String(h) : ''));
+    for (let d = 0; d < 7; d++) {
+      box.appendChild(el('div', 'lbl', DOW.at(d)));
+      for (let h = 0; h < 24; h++) {
+        const v = m.get(d + '-' + h) || 0;
+        const c = el('div');
+        if (v) c.style.background = `rgba(244,211,94,${(.15 + .85 * v / max).toFixed(2)})`;
+        c.title = `${DOW.at(d)} ${h}:00 tot ${h + 1}:00: ${nf(v)} bezoeken`;
+        box.appendChild(c);
+      }
     }
   }
 
   function dayChart(rows) {
-    const el = $('dayChart'); el.textContent = '';
-    const byDay = new Map(rows.map(r => [r.day, r]));
-    const days = [];
-    const today = new Date(); today.setHours(12, 0, 0, 0);
-    for (let i = 29; i >= 0; i--) { const d = new Date(today - i * 864e5); days.push(d.toISOString().slice(0, 10)); }
-    const vals = days.map(d => Number((byDay.get(d) || {}).bezoeken) || 0);
-    const news = days.map(d => Number((byDay.get(d) || {}).nieuw) || 0);
+    const box = $('dayChart'); box.textContent = '';
     const W = 760, H = 240, L = 40, R = 12, T = 16, B = 34, pw = W - L - R, ph = H - T - B;
+    const vals = rows.map(r => num(r.uniek));
     const max = Math.max(...vals, 1), step = Math.max(1, Math.ceil(max / 4)), top = step * Math.ceil(max / step);
-    const y = v => T + ph - v / top * ph, bw = pw / days.length;
+    const y = v => T + ph - v / top * ph, bw = pw / Math.max(1, rows.length);
     const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'Bezoeken per dag, laatste 30 dagen, hoogste dag ' + max);
+    svg.setAttribute('aria-label', 'Unieke bezoekers per dag, laatste 30 dagen, hoogste dag ' + max);
     const mk = (tag, a, txt) => { const n = document.createElementNS(ns, tag); for (const k in a) n.setAttribute(k, a[k]); if (txt != null) n.textContent = txt; svg.appendChild(n); return n; };
     for (let v = 0; v <= top; v += step) {
-      mk('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'rgba(143,163,160,.18)' });
-      mk('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: '#8fa3a0' }, nf(v));
+      mk('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'var(--grid)' });
+      mk('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: 'var(--muted)' }, nf(v));
     }
-    const label = d => { const [yy, mm, dd] = d.split('-'); return Number(dd) + ' ' + ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'].at(Number(mm) - 1); };
-    const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; el.appendChild(tip);
-    days.forEach((d, i) => {
-      const x = L + i * bw, h = Math.max(0, T + ph - y(vals.at(i)));
-      if (vals.at(i) > 0) {
-        const r = Math.min(4, h / 2);
-        mk('path', { d: `M${x + 2} ${T + ph}V${T + ph - h + r}q0 -${r} ${r} -${r}H${x + bw - 2 - r}q${r} 0 ${r} ${r}V${T + ph}Z`, fill: '#f4d35e' });
+    const label = d => Number(d.slice(8, 10)) + ' ' + MONTHS.at(Number(d.slice(5, 7)) - 1);
+    const tip = el('div', 'tip'); tip.hidden = true;
+    rows.forEach((r, i) => {
+      const x = L + i * bw, v = vals.at(i), h = Math.max(0, T + ph - y(v));
+      if (v > 0) {
+        const rr = Math.min(4, h / 2);
+        mk('path', { d: `M${x + 2} ${T + ph}V${T + ph - h + rr}q0 -${rr} ${rr} -${rr}H${x + bw - 2 - rr}q${rr} 0 ${rr} ${rr}V${T + ph}Z`, fill: 'var(--glow)' });
       }
-      if (i % 5 === 4 || i === 29) mk('text', { x: x + bw / 2, y: H - 12, 'text-anchor': 'middle', 'font-size': 11, fill: '#8fa3a0' }, label(d));
+      if (i % 5 === 4 || i === rows.length - 1) mk('text', { x: x + bw / 2, y: H - 12, 'text-anchor': 'middle', 'font-size': 11, fill: 'var(--muted)' }, label(r.day));
       const hit = mk('rect', { x, y: T, width: bw, height: ph, fill: 'transparent' });
-      const show = () => { tip.hidden = false; tip.textContent = `${label(d)}: ${nf(vals.at(i))} bezoeken, ${nf(news.at(i))} nieuw`; tip.style.left = ((x + bw / 2) / W * 100) + '%'; tip.style.top = (y(vals.at(i)) / H * 100) + '%'; };
+      const show = () => { tip.hidden = false; tip.textContent = `${label(r.day)}: ${nf(v)} uniek, ${nf(r.bezoeken)} bezoeken, ${nf(r.starts)} spelstarts, ${mins(num(r.seconden))} min gespeeld`; tip.style.left = Math.min(85, Math.max(15, (x + bw / 2) / W * 100)) + '%'; tip.style.top = (y(v) / H * 100) + '%'; };
       hit.addEventListener('mouseenter', show); hit.addEventListener('touchstart', show, { passive: true });
       hit.addEventListener('mouseleave', () => { tip.hidden = true; });
     });
-    mk('line', { x1: L, x2: W - R, y1: T + ph, y2: T + ph, stroke: '#8fa3a0' });
-    el.insertBefore(svg, tip);
+    mk('line', { x1: L, x2: W - R, y1: T + ph, y2: T + ph, stroke: 'var(--muted)' });
+    box.append(svg, tip);
   }
+
+  function table(tb, head, rows) {
+    tb.textContent = '';
+    const tr = el('tr'); head.forEach(h => tr.appendChild(el('th', null, h))); tb.appendChild(tr);
+    if (!rows.length) { const r = el('tr'); const td = el('td', 'empty', 'Nog geen gegevens.'); td.colSpan = head.length; r.appendChild(td); tb.appendChild(r); return; }
+    rows.forEach(cells => { const r = el('tr'); cells.forEach(c => r.appendChild(el('td', null, c))); tb.appendChild(r); });
+  }
+
+  function render(s) {
+    const t = s.totals || {};
+    $('roleBadge').hidden = false; $('roleBadge').textContent = s.role === 'eigenaar' ? 'Eigenaar' : 'Kopersoverzicht';
+    const since = t.sinds ? ' · gemeten sinds ' + Number(t.sinds.slice(8, 10)) + ' ' + MONTHS.at(Number(t.sinds.slice(5, 7)) - 1) + ' ' + t.sinds.slice(0, 4) : '';
+    $('asOf').textContent = 'Bijgewerkt: ' + new Date().toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' }) + since;
+    tiles(t, s.role);
+    dayChart(s.days || []);
+    funnel(t);
+    heat(s.heat || []);
+    table($('gamesTable'), ['Spel', 'Gestart', 'Uitgespeeld', 'Gem. speeltijd', 'Gem. level', 'Hoogste level', 'Hoogste score', 'Gedeeld'],
+      (s.per_game || []).map(g => [NAMES[g.game] || g.game, nf(g.starts), nf(g.uitgespeeld), num(g.rondes) ? mins(num(g.seconden) / num(g.rondes)) + ' min' : '–',
+        num(g.rondes) ? (num(g.level_som) / num(g.rondes)).toLocaleString('nl-NL', { maximumFractionDigits: 1 }) : '–', nf(g.hoogste_level) || '–', nf(g.hoogste_score), nf(g.gedeeld)]));
+    const total = (s.sources || []).reduce((a, r) => a + num(r.n), 0);
+    bars($('sources'), s.sources || [], SOURCES, total);
+    bars($('devices'), s.devices || [], DEVICES);
+    bars($('langs'), s.langs || [], LANGS);
+    const months = (s.months || []).slice().reverse();
+    // newest first; stop at the oldest month that has any activity (always show the current month)
+    let lastWithData = 0;
+    months.forEach((m, i) => { if (num(m.bezoeken) || num(m.starts)) lastWithData = i; });
+    table($('monthsTable'), ['Maand', 'Bezoeken', 'Unieke bezoekers', 'Spelstarts', 'Speeltijd', 'Groei bezoeken'],
+      months.map((m, i) => {
+        const prev = months[i + 1]; const g = prev ? growth(num(m.bezoeken), num(prev.bezoeken)) : null;
+        return [MONTHS.at(Number(m.maand.slice(5, 7)) - 1) + ' ' + m.maand.slice(0, 4), nf(m.bezoeken), nf(m.uniek), nf(m.starts), hours(num(m.seconden)) + ' uur', g == null ? '–' : (g >= 0 ? '+' : '') + g + '%'];
+      }).filter((_, i) => i <= lastWithData));
+  }
+  window.__renderStats = render;
 
   async function load(code) {
     $('gateMsg').textContent = '';
@@ -170,12 +304,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--glow); outl
       const s = await fetchStats(code);
       store.set('nsh-stats-code', code);
       $('gate').hidden = true; $('dash').hidden = false;
-      tiles(s.totals || {});
-      dayChart(s.visits_by_day || []);
-      bars($('games'), s.plays_by_game || [], 'game', 'starts');
-      bars($('sources'), s.by_source || [], 'source', 'bezoeken');
-      bars($('devices'), s.by_device || [], 'device', 'bezoeken');
-      $('asOf').textContent = 'Bijgewerkt: ' + new Date().toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' });
+      render(s);
     } catch (e) {
       store.set('nsh-stats-code', null);
       $('dash').hidden = true; $('gate').hidden = false;
@@ -184,7 +313,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--glow); outl
   }
   $('gateForm').addEventListener('submit', e => { e.preventDefault(); const c = $('code').value.trim(); if (c) load(c); });
   $('refresh').addEventListener('click', () => { const c = store.get('nsh-stats-code'); if (c) load(c); });
-  $('logout').addEventListener('click', () => { store.set('nsh-stats-code', null); $('dash').hidden = true; $('gate').hidden = false; $('code').value = ''; });
+  $('print').addEventListener('click', () => window.print());
+  $('logout').addEventListener('click', () => { store.set('nsh-stats-code', null); $('dash').hidden = true; $('gate').hidden = false; $('code').value = ''; $('roleBadge').hidden = true; });
   const saved = store.get('nsh-stats-code');
   if (saved) load(saved);
 })();
