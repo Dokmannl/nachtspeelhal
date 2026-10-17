@@ -217,22 +217,8 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
 
   <section class="sale" aria-labelledby="saleTitle">
     <h2 class="display" id="saleTitle">Deze site is te koop</h2>
-    <p>Nachtspeelhal is te koop als compleet pakket. Klaar om over te nemen en verder uit te bouwen.</p>
-    <ul>
-      <li>Elf eigen spellen, met levels, muziek en bediening voor telefoon en computer</li>
-      <li>Een scorebord per spel</li>
-      <li>Eigen ontwerp en logo</li>
-      <li>Het domein, zodra dat geregistreerd is</li>
-    </ul>
-    <p class="mail" id="mailNote">Interesse? Het e-mailadres voor contact volgt binnenkort.</p>
-    <form class="contact" id="contactForm" hidden>
-      <div class="cf-row">
-        <label for="cfName">Naam<input id="cfName" maxlength="60" autocomplete="name"></label>
-        <label for="cfContact">E-mail of telefoon<input id="cfContact" maxlength="120" autocomplete="email"></label>
-      </div>
-      <label for="cfMsg">Bericht<textarea id="cfMsg" rows="4" maxlength="2000"></textarea></label>
-      <div class="row"><button class="play-btn" type="submit" id="cfSend">Verstuur bericht</button><span id="cfStatus" role="status"></span></div>
-    </form>
+    <p>Elf eigen spellen, scoreborden en statistieken, klaar om over te nemen. Bekijk precies wat je krijgt en doe een bod.</p>
+    <div><a class="play-btn" href="te-koop.html" style="display:inline-block;text-decoration:none">Bekijk wat je krijgt &rarr;</a></div>
   </section>
 
   <section class="legal" aria-labelledby="legalTitle">
@@ -1088,6 +1074,7 @@ window.rrect = function (c, x, y, w, h, r) {
   if (useSupa) {
     loadSupa();
     setInterval(() => { if (!document.hidden) loadSupa(); }, 30000);
+    if ($('contactForm')) {
     $('contactForm').hidden = false;
     $('mailNote').textContent = 'Interesse? Laat hieronder een bericht achter, dan neem ik contact met je op.';
     $('contactForm').addEventListener('submit', async e => {
@@ -1107,6 +1094,7 @@ window.rrect = function (c, x, y, w, h, r) {
       }
       $('cfSend').disabled = false;
     });
+    }
   }
 })();
 </script>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nachtspeelhal te koop</title>
+<meta name="description" content="Nachtspeelhal is te koop: elf eigen browserspellen met levels, muziek, scoreborden, statistieken en een contactformulier, klaar om over te nemen. Doe een bod.">
+<meta name="theme-color" content="#070b17">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nachtspeelhal is te koop">
+<meta property="og:description" content="Elf eigen browserspellen, scoreborden en statistieken, klaar om over te nemen. Doe een bod.">
+<meta property="og:url" content="https://dokmannl.github.io/nachtspeelhal/te-koop.html">
+<meta property="og:image" content="https://dokmannl.github.io/nachtspeelhal/deel.jpg">
+<meta property="og:locale" content="nl_NL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one long sales page. Hero with the share image and a bid button, then sections in reading order: games grid, features, numbers on request, costs and technology, handover steps, FAQ, bid form. Same night palette as the site. */
+:root {
+  --night: #070b17; --panel: #0f1824; --line: #1f2e3a; --ink: #e8efe4; --muted: #8fa3a0;
+  --glow: #f4d35e; --mint: #9ef0c8; --danger: #e5484d;
+  --display: "Fraunces", Georgia, serif; --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--night); color: var(--ink); font: 16px/1.6 var(--body);
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px));
+}
+main { max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 56px; }
+a { color: var(--glow); }
+.display { font-family: var(--display); font-style: italic; font-weight: 600; }
+h1 { margin: 0; font-size: clamp(2.4rem, 7vw, 4rem); line-height: 1.05; color: var(--glow); text-wrap: balance; }
+h2 { margin: 0 0 6px; font-size: clamp(1.6rem, 4vw, 2.1rem); color: var(--glow); text-wrap: balance; }
+h3 { margin: 0; font-size: 1.05rem; }
+p { margin: 0; max-width: 65ch; }
+.lead { color: var(--muted); font-size: 1.08rem; }
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: .92rem; }
+.nav a { color: var(--muted); }
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: center; }
+.hero-text { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.hero img { width: 100%; border-radius: 14px; border: 1px solid var(--line); display: block; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-main { display: inline-block; background: var(--glow); color: var(--night); text-decoration: none; border: 0; border-radius: 99px; padding: 12px 24px; font-weight: 700; font: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 0 24px rgba(244,211,94,.35); }
+.btn-ghost { display: inline-block; color: var(--ink); text-decoration: none; border: 1px solid #3a4c58; border-radius: 99px; padding: 11px 22px; }
+.btn-main:focus-visible, .btn-ghost:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 20px; color: var(--muted); font-size: .92rem; }
+.facts b { color: var(--ink); }
+section { display: flex; flex-direction: column; gap: 16px; }
+.games { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 14px; }
+.game { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.game canvas { width: 100%; aspect-ratio: 16 / 9; display: block; }
+.game div { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 4px; }
+.game h3 { color: var(--accent, var(--glow)); font-family: var(--display); font-style: italic; font-weight: 600; font-size: 1.2rem; }
+.game p { color: var(--muted); font-size: .88rem; line-height: 1.45; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 14px; }
+.feature { border-top: 2px solid var(--line); padding-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+.feature p { color: var(--muted); font-size: .95rem; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; }
+.panel.gold { border-color: var(--glow); background: rgba(244,211,94,.05); }
+.stat-list { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; color: var(--muted); }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+td, th { text-align: left; padding: 9px 10px; border-top: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 400; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; border-top: 0; }
+td:last-child { color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+ol.steps { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 14px; counter-reset: step; }
+ol.steps li { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; counter-increment: step; display: flex; flex-direction: column; gap: 4px; }
+ol.steps li::before { content: "Stap " counter(step); color: var(--glow); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; }
+ol.steps li p { color: var(--muted); font-size: .92rem; }
+details { border-top: 1px solid var(--line); padding: 12px 0; }
+details:last-child { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; font-weight: 700; }
+details p { color: var(--muted); margin-top: 8px; }
+form { display: flex; flex-direction: column; gap: 12px; }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 12px; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: .88rem; color: var(--muted); min-width: 0; }
+input, textarea { font: inherit; color: var(--ink); padding: 10px 12px; border-radius: 10px; border: 1px solid #3a4c58; background: var(--night); resize: vertical; }
+#bidStatus { color: var(--mint); min-height: 1.4em; }
+.small { color: var(--muted); font-size: .85rem; }
+footer { color: var(--muted); font-size: .85rem; text-align: center; }
+</style>
+</head>
+<body>
+<main>
+  <nav class="nav">
+    <a href="./">&larr; Naar Nachtspeelhal</a>
+    <a href="#bod">Doe een bod</a>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-text">
+      <span class="small" style="letter-spacing:.14em;text-transform:uppercase">Te koop</span>
+      <h1 class="display">Nachtspeelhal is te koop</h1>
+      <p class="lead">Een complete spellensite met elf eigen browserspellen, scoreborden, statistieken en een contactformulier. Alles werkt al en draait zonder maandelijkse kosten. Je kunt hem zo overnemen en verder laten groeien.</p>
+      <div class="btns">
+        <a class="btn-main" href="#bod">Doe een bod</a>
+        <a class="btn-ghost" href="./">Probeer de site</a>
+      </div>
+      <div class="facts"><span><b>11</b> spellen</span><span><b>Telefoon en computer</b></span><span><b>&euro; 0</b> per maand</span><span><b>Klaar</b> om over te nemen</span></div>
+    </div>
+  </header>
+
+  <section aria-labelledby="h-spellen">
+    <h2 class="display" id="h-spellen">Wat je krijgt: elf spellen</h2>
+    <p class="lead">Elk spel is zelf gemaakt, heeft eindeloze levels die steeds moeilijker worden, een eigen muziekje en een eigen scorebord.</p>
+    <div class="games" id="games"></div>
+  </section>
+
+  <section aria-labelledby="h-mogelijk">
+    <h2 class="display" id="h-mogelijk">Wat de site allemaal kan</h2>
+    <div class="features">
+      <div class="feature"><h3>Levels die zwaarder worden</h3><p>Per spel nieuwe uitdagingen: snellere vijanden, bewegende platforms, wind, mist en meer.</p></div>
+      <div class="feature"><h3>Gedeeld scorebord</h3><p>Top 10 per spel voor iedereen, met een filter tegen scheldwoorden en bescherming tegen valsspelen.</p></div>
+      <div class="feature"><h3>Deelknop</h3><p>Spelers delen hun score via WhatsApp of een link; de link opent direct dat spel. Gratis nieuwe bezoekers.</p></div>
+      <div class="feature"><h3>Telefoon en computer</h3><p>Aanraakknoppen en vegen op de telefoon, toetsenbord en muis op de computer, volledig scherm en trillen op Android.</p></div>
+      <div class="feature"><h3>Muziek en geluid</h3><p>Elk spel een eigen muziekje, in de browser gemaakt. Geen muziekbestanden, dus geen rechten van anderen.</p></div>
+      <div class="feature"><h3>Statistieken</h3><p>Unieke bezoekers, speeltijd, populairste spellen, drukste uren en herkomst, zonder cookies of persoonsgegevens.</p></div>
+      <div class="feature"><h3>Contactformulier met melding</h3><p>Berichten komen in de database en direct als melding op Telegram.</p></div>
+      <div class="feature"><h3>Eigen ontwerp</h3><p>Eigen logo, huisstijl, voorpagina en deelafbeelding voor sociale media.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-cijfers">
+    <div class="panel gold">
+      <h2 class="display" id="h-cijfers">Bezoekerscijfers op aanvraag</h2>
+      <p>Wil je zien hoe de site het doet? Vraag een <b>kopercode</b> aan. Daarmee open je het volledige statistiekenoverzicht, en je kunt het ook als PDF bewaren:</p>
+      <ul class="stat-list">
+        <li>unieke bezoekers per dag, week en maand, met groei</li>
+        <li>speeltijd per bezoek en in totaal</li>
+        <li>populairste spellen, met gemiddeld level en hoogste score</li>
+        <li>drukste dagen en uren, herkomst van bezoekers, telefoon of computer</li>
+        <li>maandoverzicht</li>
+      </ul>
+      <div class="btns"><a class="btn-main" href="#bod" id="askCode">Vraag een kopercode aan</a></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-techniek">
+    <h2 class="display" id="h-techniek">Kosten en techniek</h2>
+    <p class="lead">De site draait op twee gratis diensten. Je hoeft niet te kunnen programmeren om hem te laten draaien.</p>
+    <div class="tablewrap"><table>
+      <tr><th>Onderdeel</th><th>Waar</th><th>Kosten</th></tr>
+      <tr><td>Website</td><td>GitHub Pages</td><td>Gratis</td></tr>
+      <tr><td>Scores, berichten en statistieken</td><td>Supabase, servers in de EU (Frankfurt)</td><td>Gratis plan</td></tr>
+      <tr><td>Meldingen van berichten</td><td>Telegram</td><td>Gratis</td></tr>
+      <tr><td>Eigen domeinnaam</td><td>Naar keuze, bijvoorbeeld nachtspeelhal.nl</td><td>Enkele euro's tot een paar tientjes per jaar</td></tr>
+    </table></div>
+    <p class="small">De site is gewone HTML, CSS en JavaScript zonder extra pakketten: elk spel is &eacute;&eacute;n bestand, dus een spel toevoegen of aanpassen is overzichtelijk.</p>
+  </section>
+
+  <section aria-labelledby="h-overdracht">
+    <h2 class="display" id="h-overdracht">Zo gaat de overdracht</h2>
+    <ol class="steps">
+      <li><h3>Bod en afspraak</h3><p>Je doet een bod. Zijn we het eens, dan zetten we de afspraken kort op papier.</p></li>
+      <li><h3>Betaling</h3><p>Je betaalt het afgesproken bedrag. Bij een groter bedrag kan dat via een tussenpartij zoals Escrow.com.</p></li>
+      <li><h3>Overzetten</h3><p>De code gaat naar jouw GitHub-account en de database met alle scores en cijfers naar jouw Supabase-account.</p></li>
+      <li><h3>Controle en uitleg</h3><p>Samen controleren we dat alles werkt. Je krijgt een overdrachtshandleiding met alle uitleg.</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-vragen">
+    <h2 class="display" id="h-vragen">Veelgestelde vragen</h2>
+    <div>
+      <details><summary>Moet ik kunnen programmeren?</summary><p>Nee. De site draait vanzelf. Scores en berichten beheer je in een overzichtelijk dashboard. Voor aanpassingen helpt kennis van HTML en JavaScript, maar het is niet nodig om de site te laten draaien.</p></details>
+      <details><summary>Wat kost het per maand?</summary><p>Niets. GitHub Pages en het gratis plan van Supabase kosten niets. Alleen een eigen domeinnaam kost een klein bedrag per jaar, als je die wilt.</p></details>
+      <details><summary>Kan ik er reclame op zetten of geld mee verdienen?</summary><p>Ja. Je kunt bijvoorbeeld advertenties, donaties of een premiumversie toevoegen. Let er dan op dat je bij advertenties met cookies een cookiemelding nodig hebt.</p></details>
+      <details><summary>Krijg ik de scores en statistieken mee?</summary><p>Ja. Bij de overdracht gaat het hele Supabase-project mee, met alle scores, berichten en bezoekerscijfers.</p></details>
+      <details><summary>Kan ik de naam en het uiterlijk veranderen?</summary><p>Ja, alles is van jou na de overdracht: naam, logo, kleuren en teksten.</p></details>
+      <details><summary>Waar komen de spellen vandaan?</summary><p>Alle spellen zijn eigen versies, gemaakt voor deze site. Ze zijn ge&iuml;nspireerd op bekende klassiekers, maar de code, de graphics en de muziek zijn eigen werk.</p></details>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-bod" id="bod">
+    <div class="panel">
+      <h2 class="display" id="h-bod">Doe een bod</h2>
+      <p>Laat je gegevens en je bod achter, dan neem ik snel contact met je op. Een bod is vrijblijvend. Een kopercode voor de statistieken aanvragen kan ook via dit formulier.</p>
+      <form id="bidForm">
+        <div class="row2">
+          <label for="bName">Naam<input id="bName" maxlength="60" autocomplete="name"></label>
+          <label for="bContact">E-mail of telefoon<input id="bContact" maxlength="120" autocomplete="email"></label>
+        </div>
+        <label for="bBid">Je bod in euro's (optioneel)<input id="bBid" inputmode="numeric" maxlength="12" placeholder="bijvoorbeeld 500"></label>
+        <label for="bMsg">Bericht<textarea id="bMsg" rows="5" maxlength="1800" placeholder="Wat wil je weten of afspreken?"></textarea></label>
+        <div class="btns" style="align-items:center"><button class="btn-main" type="submit" id="bSend">Verstuur</button><span id="bidStatus" role="status"></span></div>
+      </form>
+      <p class="small">Je gegevens worden alleen gebruikt om je te antwoorden.</p>
+    </div>
+  </section>
+
+  <footer>&copy; 2026 Nachtspeelhal &middot; <a href="./" style="color:inherit">Speel de spellen</a></footer>
+</main>
+
+<script>
+window.GAMES = [];
+window.rrect = function (c, x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  c.beginPath(); c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+};
+</script>
+<script src="games/vuurvlieg.js"></script>
+<script src="games/stuiterbal.js"></script>
+<script src="games/racebaan.js"></script>
+<script src="games/sprongheld.js"></script>
+<script src="games/slang.js"></script>
+<script src="games/toren.js"></script>
+<script src="games/sterrenblokken.js"></script>
+<script src="games/kikkersprong.js"></script>
+<script src="games/lantaarnman.js"></script>
+<script src="games/uilenvlucht.js"></script>
+<script src="games/spokenjacht.js"></script>
+<script>
+(() => {
+  const SUPA = { url: 'https://mcakdvonmliccvqtzsuw.supabase.co', key: 'sb_publishable_N10Mu-RjANOLzRHon0ZwrQ_WX-zdJGY' };
+  const $ = id => document.getElementById(id);
+
+  // games grid, drawn with each game's own thumbnail
+  for (const def of GAMES) {
+    const card = document.createElement('a');
+    card.className = 'game'; card.href = './#' + def.id; card.style.textDecoration = 'none'; card.style.color = 'inherit';
+    card.style.setProperty('--accent', def.color);
+    const c = document.createElement('canvas'); c.width = 640; c.height = 360;
+    try { const x = c.getContext('2d'); x.scale(2, 2); def.thumb(x, 320, 180); } catch (e) {}
+    const body = document.createElement('div');
+    const h = document.createElement('h3'); h.textContent = def.name;
+    const p = document.createElement('p'); p.textContent = def.blurb;
+    body.append(h, p); card.append(c, body);
+    $('games').appendChild(card);
+  }
+
+  $('askCode').addEventListener('click', () => {
+    if (!$('bMsg').value.trim()) $('bMsg').value = 'Ik wil graag een kopercode om de statistieken te bekijken.';
+  });
+
+  $('bidForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const st = $('bidStatus');
+    const name = $('bName').value.trim(), contact = $('bContact').value.trim(), msg = $('bMsg').value.trim();
+    const bid = $('bBid').value.replace(/[^0-9.,]/g, '').trim();
+    if (!name) { st.textContent = 'Vul je naam in.'; $('bName').focus(); return; }
+    if (contact.length < 3) { st.textContent = 'Vul een e-mailadres of telefoonnummer in.'; $('bContact').focus(); return; }
+    if (!bid && msg.length < 5) { st.textContent = 'Vul een bod in of schrijf een kort bericht.'; $('bMsg').focus(); return; }
+    const text = (bid ? 'Bod: € ' + bid + '\n\n' : '') + (msg || 'Ik doe een bod op Nachtspeelhal.');
+    $('bSend').disabled = true; st.textContent = 'Versturen…';
+    try {
+      const r = await fetch(SUPA.url + '/rest/v1/rpc/send_message', { method: 'POST', headers: { apikey: SUPA.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_name: name, p_contact: contact, p_message: text }) });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw Object.assign(new Error('fout'), { code: d.message }); }
+      st.textContent = 'Bedankt! Je bericht is verstuurd. Ik neem zo snel mogelijk contact met je op.';
+      $('bName').value = ''; $('bContact').value = ''; $('bBid').value = ''; $('bMsg').value = '';
+    } catch (err) {
+      st.textContent = err.code === 'te_vaak' ? 'Je hebt al een paar berichten gestuurd. Probeer het later opnieuw.' : 'Versturen lukte niet. Probeer het later opnieuw.';
+    }
+    $('bSend').disabled = false;
+  });
+})();
+</script>
+</body>
+</html>
