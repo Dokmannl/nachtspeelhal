@@ -84,6 +84,37 @@ button:focus-visible, input:focus-visible, .card:focus-visible { outline: 2px so
 .legal h2 { font-size: 1.25rem; color: var(--ink); }
 .legal ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
 .copy { color: var(--muted); font-size: .8rem; text-align: center; }
+/* ---------- daily challenge ---------- */
+.daily { border: 1px solid var(--accent, var(--glow)); border-radius: 16px; background: var(--panel); overflow: hidden; display: grid; grid-template-columns: minmax(0, 300px) 1fr; text-align: left; width: 100%; }
+.daily canvas { display: block; width: 100%; height: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.daily .d-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.daily .d-title { margin: 0; font-size: 1.6rem; color: var(--accent, var(--glow)); }
+.daily p { margin: 0; color: var(--muted); line-height: 1.5; }
+.daily .d-cols { display: grid; grid-template-columns: 1fr auto; gap: 14px; align-items: end; }
+.daily .d-left { font-size: .85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.daily .d-me { font-size: .9rem; color: var(--ink); }
+@media (max-width: 640px) { .daily { grid-template-columns: 1fr; } .daily .d-cols { grid-template-columns: 1fr; } }
+/* ---------- achievements ---------- */
+.ach-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 16px; }
+.ach-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.ach-prog { height: 6px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.ach-prog i { display: block; height: 100%; background: var(--glow); border-radius: 99px; }
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 10px; }
+.ach { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+.ach .ic { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 1.3rem; background: #18242f; color: #55687a; border: 2px solid #26384a; }
+.ach b { display: block; font-size: .95rem; }
+.ach span { display: block; font-size: .8rem; color: var(--muted); line-height: 1.35; }
+.ach.on { border-color: rgba(244, 211, 94, .45); }
+.ach.on .ic { background: radial-gradient(circle at 35% 30%, #fff6c8, var(--glow) 55%, var(--ember)); color: var(--night); border-color: var(--glow); box-shadow: 0 0 14px rgba(244, 211, 94, .4); }
+.ach:not(.on) b { color: var(--muted); }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); opacity: 0; transition: opacity .25s, transform .25s; z-index: 50; pointer-events: none;
+  display: grid; grid-template-columns: 40px 1fr; gap: 12px; align-items: center; padding: 10px 18px 10px 10px; border-radius: 99px; background: #101c28; border: 1px solid var(--glow); box-shadow: 0 0 30px rgba(244, 211, 94, .35); max-width: calc(100vw - 32px); }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+#toast .ic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 1.2rem; background: radial-gradient(circle at 35% 30%, #fff6c8, var(--glow) 55%, var(--ember)); color: var(--night); }
+#toast small { display: block; font-size: .7rem; letter-spacing: .14em; text-transform: uppercase; color: var(--glow); }
+#toast b { display: block; }
+.d-tag { display: inline-block; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--night); background: var(--accent, var(--glow)); border-radius: 99px; padding: 3px 10px; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
 .contact { display: flex; flex-direction: column; gap: 10px; }
 .cf-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
 .contact label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); min-width: 0; }
@@ -215,6 +246,8 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <div class="strip" id="strip" aria-hidden="true"></div>
   </section>
 
+  <section class="daily-slot" data-where="welkom" aria-label="Uitdaging van vandaag"></section>
+
   <section class="sale" aria-labelledby="saleTitle">
     <h2 class="display" id="saleTitle">Deze site is te koop</h2>
     <p>Twaalf eigen spellen, scoreborden en statistieken, klaar om over te nemen. Bekijk precies wat je krijgt en doe een bod.</p>
@@ -247,9 +280,20 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <p>Kies een spel, haal een zo hoog mogelijke score en zet je naam op het scorebord. Werkt met toetsenbord, muis of je vinger.</p>
   </section>
 
+  <section class="daily-slot" data-where="home" aria-label="Uitdaging van vandaag"></section>
+
   <section style="display:flex;flex-direction:column;gap:16px" aria-labelledby="gamesTitle">
     <h2 class="section display" id="gamesTitle">Spellen</h2>
     <div class="grid" id="grid"></div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:14px" aria-labelledby="achTitle" id="prestaties">
+    <div class="ach-head">
+      <h2 class="section display" id="achTitle">Prestaties</h2>
+      <span class="ach-count" id="achCount"></span>
+    </div>
+    <div class="ach-prog" aria-hidden="true"><i id="achBar"></i></div>
+    <div class="ach-grid" id="achGrid"></div>
   </section>
 
   <footer id="foot">Elk spel heeft een eigen scorebord met de top 10, te zien als je het spel opent. Per naam telt alleen je beste score.</footer>
@@ -322,6 +366,8 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     </div>
   </div>
 </div>
+
+<div id="toast" role="status" aria-live="polite"><div class="ic" id="toastIc"></div><div><small>Prestatie behaald</small><b id="toastName"></b></div></div>
 
 <script>
 window.GAMES = [];
@@ -544,6 +590,19 @@ window.rrect = function (c, x, y, w, h, r) {
       return { where: 'local', error: true };
     }
   }
+  async function saveDaily(name, score) {
+    const list = dailyLocal();
+    const same = list.find(r => String(r.name).toLowerCase() === name.toLowerCase());
+    if (same) { if (score > same.score) { same.score = score; same.at = Date.now(); same.name = name; } }
+    else list.push({ game: boardId(), name, score, at: Date.now() });
+    store.set('nsh-dagscores-' + today, list.sort((a, b) => b.score - a.score).slice(0, 20));
+    if (!useSupa) return 'local';
+    try {
+      await supa('rpc/submit_daily', { p_day: today, p_game: boardId(), p_name: name, p_score: score });
+      await loadDaily();
+      return 'shared';
+    } catch (e) { return 'local'; }
+  }
   async function initDb() {
     if (!window.claude || !window.claude.use) return;
     try { db = await window.claude.use('db'); } catch (e) { db = null; }
@@ -561,12 +620,12 @@ window.rrect = function (c, x, y, w, h, r) {
     } catch (e) {}
   }
 
-  function renderList(el, id, n, highlight) {
+  function renderList(el, id, n, highlight) { renderRows(el, topFor(id, n), highlight); }
+  function renderRows(el, rows, highlight, emptyText) {
     el.textContent = '';
-    const rows = topFor(id, n);
     if (!rows.length) {
       const li = document.createElement('li'); const s = document.createElement('span');
-      s.className = 'empty'; s.textContent = 'Nog geen scores. Speel een potje en zet je naam erop.';
+      s.className = 'empty'; s.textContent = emptyText || 'Nog geen scores. Speel een potje en zet je naam erop.';
       li.style.display = 'block'; li.style.padding = '0'; li.appendChild(s); el.appendChild(li); return;
     }
     rows.forEach((r, i) => {
@@ -582,7 +641,12 @@ window.rrect = function (c, x, y, w, h, r) {
   function renderBoard() {
     const me = store.get('nsh-name', '');
     GAMES.forEach(def => { const el = document.getElementById('mini-' + def.id); if (el) renderList(el, def.id, 3, me); });
-    if (cur) {
+    if (cur && dailyOn) {
+      const src = 'Dagklassement van vandaag' + (dailyRows ? '' : ' op dit apparaat');
+      $('introSource').textContent = src; $('overSource').textContent = src;
+      renderRows($('introList'), dailyTop(10), me, 'Nog niemand vandaag. Word jij de eerste?');
+      renderRows($('overList'), dailyTop(10), lastName || me, 'Nog niemand vandaag. Word jij de eerste?');
+    } else if (cur) {
       $('introSource').textContent = sourceText(); $('overSource').textContent = sourceText();
       renderList($('introList'), boardId(), 10, me);
       renderList($('overList'), boardId(), 10, lastName || me);
@@ -613,6 +677,165 @@ window.rrect = function (c, x, y, w, h, r) {
       '</svg>';
   }
   document.querySelectorAll('.logo-slot').forEach(el => { el.innerHTML = logoSVG(); el.style.display = 'block'; });
+
+  // ---------- daily challenge: one game per day, same start for everyone ----------
+  const pad2 = n => String(n).padStart(2, '0');
+  const dayKeyOf = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+  let today = dayKeyOf(new Date());
+  function dailyGame(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    const idx = Math.round(Date.UTC(y, m - 1, d) / 864e5);
+    return GAMES[(idx * 5 % GAMES.length + GAMES.length) % GAMES.length];
+  }
+  function seeded(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  const hashStr = str => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const realRandom = Math.random;
+  let dailyOn = false, dailyRows = null;
+  function seedRandom() { Math.random = dailyOn ? seeded(hashStr('nachtspeelhal-' + today)) : realRandom; }
+  const dailyLocal = () => { const v = store.get('nsh-dagscores-' + today, []); return Array.isArray(v) ? v : []; };
+  function dailyTop(n) {
+    const list = dailyRows || dailyLocal().map(clean).filter(Boolean);
+    return list.slice().sort((a, b) => b.score - a.score || a.at - b.at).slice(0, n);
+  }
+  async function loadDaily() {
+    if (!useSupa) return;
+    try {
+      const rows = await supa('daily_top?day=eq.' + today + '&select=game,name,score,at');
+      dailyRows = (rows || []).map(r => clean({ game: r.game, name: r.name, score: r.score, at: Date.parse(r.at) })).filter(Boolean);
+      renderDaily(); renderBoard();
+    } catch (e) {}
+  }
+  function hoursLeft() {
+    const now = new Date(), mid = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    const min = Math.max(1, Math.round((mid - now) / 60000));
+    return min >= 60 ? 'Nog ' + Math.floor(min / 60) + ' uur en ' + (min % 60) + ' min' : 'Nog ' + min + ' minuten';
+  }
+  function renderDaily() {
+    const key = dayKeyOf(new Date());
+    if (key !== today) { today = key; dailyRows = null; loadDaily(); }
+    const def = dailyGame(today);
+    const me = store.get('nsh-name', '');
+    const myBest = Number(store.get('nsh-dagbest-' + today, 0)) || 0;
+    const dateTxt = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.querySelectorAll('.daily-slot').forEach(slot => {
+      slot.textContent = '';
+      const box = document.createElement('div'); box.className = 'daily'; box.style.setProperty('--accent', def.color);
+      const c = document.createElement('canvas'); c.width = 640; c.height = 360;
+      try { const x = c.getContext('2d'); x.scale(2, 2); def.thumb(x, 320, 180); } catch (e) {}
+      const body = document.createElement('div'); body.className = 'd-body';
+      const tag = document.createElement('span'); tag.className = 'd-tag'; tag.textContent = 'Uitdaging van vandaag'; tag.style.alignSelf = 'flex-start';
+      const h = document.createElement('h2'); h.className = 'd-title display'; h.textContent = def.name;
+      const p = document.createElement('p'); p.textContent = 'Iedereen speelt vandaag ' + def.name + ' met precies dezelfde start. Wie haalt de hoogste score van ' + dateTxt + '?';
+      const cols = document.createElement('div'); cols.className = 'd-cols';
+      const left = document.createElement('div');
+      const lh = document.createElement('div'); lh.className = 'eyebrow'; lh.textContent = 'Dagklassement top 3'; lh.style.marginBottom = '6px';
+      const ol = document.createElement('ol'); ol.className = 'scores mini';
+      renderRows(ol, dailyTop(3), me, 'Nog niemand vandaag. Word jij de eerste?');
+      left.append(lh, ol);
+      const right = document.createElement('div'); right.style.cssText = 'display:flex;flex-direction:column;gap:8px;align-items:flex-start';
+      const meTxt = document.createElement('span'); meTxt.className = 'd-me'; meTxt.textContent = myBest ? 'Jouw beste vandaag: ' + myBest.toLocaleString('nl-NL') : 'Je hebt vandaag nog niet meegedaan';
+      const go = document.createElement('button'); go.type = 'button'; go.className = 'play-btn'; go.textContent = 'Doe mee';
+      go.addEventListener('click', () => { showGames(); openGame(def, true); });
+      const tl = document.createElement('span'); tl.className = 'd-left'; tl.textContent = hoursLeft() + ' tot de volgende uitdaging';
+      right.append(meTxt, go, tl);
+      cols.append(left, right);
+      body.append(tag, h, p, cols);
+      box.append(c, body);
+      slot.appendChild(box);
+    });
+  }
+
+  // ---------- achievements: kept on this device ----------
+  const ACH = [
+    { id: 'eerste', ic: '★', name: 'Eerste potje', how: 'Speel je eerste spel.' },
+    { id: 'vijf', ic: '✦', name: 'Ontdekker', how: 'Speel 5 verschillende spellen.' },
+    { id: 'alle', ic: '♛', name: 'Alleskunner', how: 'Speel alle 12 spellen.' },
+    { id: 'scorebord', ic: '№', name: 'Op het scorebord', how: 'Zet je naam op een scorebord.' },
+    { id: 'record', ic: '↑', name: 'Beter dan ooit', how: 'Verbeter je eigen record.' },
+    { id: 'gedeeld', ic: '↪', name: 'Opschepper', how: 'Deel je score met iemand.' },
+    { id: 'dag1', ic: '☼', name: 'Dagtaak', how: 'Doe mee aan de uitdaging van vandaag.' },
+    { id: 'dag3', ic: '☀', name: 'Volhouder', how: 'Doe 3 dagen op rij mee aan de uitdaging.' },
+    { id: 'dag7', ic: '❂', name: 'Week vol', how: 'Doe 7 dagen op rij mee aan de uitdaging.' },
+    { id: 'nacht', ic: '☾', name: 'Nachtbraker', how: 'Speel tussen middernacht en 5 uur.' },
+    { id: 'marathon', ic: '⧗', name: 'Marathon', how: 'Speel 10 minuten in één ronde.' },
+    { id: 'honderd', ic: 'Ⅰ', name: 'Vaste gast', how: 'Speel 100 rondes.' },
+    { id: 'lvl-', ic: '5', name: 'Level 5', how: 'Haal level 5 in ' }
+  ];
+  function achList() {
+    const out = [];
+    ACH.forEach(a => {
+      if (a.id !== 'lvl-') { out.push(a); return; }
+      GAMES.forEach(g => out.push({ id: 'lvl-' + g.id, ic: '5', name: g.name + ': level 5', how: a.how + g.name + '.' }));
+    });
+    return out;
+  }
+  let achDone = store.get('nsh-prestaties', {});
+  if (!achDone || typeof achDone !== 'object') achDone = {};
+  const toastQ = [];
+  let toastBusy = false;
+  function unlock(id) {
+    if (achDone[id]) return;
+    const a = achList().find(x => x.id === id);
+    if (!a) return;
+    achDone[id] = Date.now(); store.set('nsh-prestaties', achDone);
+    track('rpc/track_event', { p_kind: 'prestatie', p_game: id });
+    toastQ.push(a); nextToast();
+    renderAch();
+  }
+  function nextToast() {
+    if (toastBusy || !toastQ.length) return;
+    const a = toastQ.shift(), t = $('toast');
+    toastBusy = true;
+    (document.fullscreenElement || document.webkitFullscreenElement || document.body).appendChild(t);
+    $('toastIc').textContent = a.ic; $('toastName').textContent = a.name;
+    sound(660, .1, 'triangle', .06, 120); setTimeout(() => sound(990, .2, 'triangle', .06, 200), 110);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => { toastBusy = false; nextToast(); }, 300); }, 3200);
+  }
+  function renderAch() {
+    const grid = $('achGrid'); if (!grid) return;
+    const list = achList(), got = list.filter(a => achDone[a.id]).length;
+    $('achCount').textContent = got + ' van ' + list.length + ' behaald';
+    $('achBar').style.width = (got / list.length * 100).toFixed(1) + '%';
+    grid.textContent = '';
+    list.forEach(a => {
+      const on = !!achDone[a.id];
+      const el = document.createElement('div'); el.className = 'ach' + (on ? ' on' : '');
+      const ic = document.createElement('div'); ic.className = 'ic'; ic.textContent = a.ic; ic.setAttribute('aria-hidden', 'true');
+      const tx = document.createElement('div');
+      const b = document.createElement('b'); b.textContent = a.name;
+      const sp = document.createElement('span'); sp.textContent = on ? 'Behaald op ' + fmtDate(achDone[a.id]) : a.how;
+      tx.append(b, sp); el.append(ic, tx);
+      el.setAttribute('aria-label', a.name + (on ? ', behaald' : ', nog niet behaald: ' + a.how));
+      grid.appendChild(el);
+    });
+  }
+  function onRoundStart() {
+    const played = store.get('nsh-gespeeld', []);
+    const list = Array.isArray(played) ? played : [];
+    if (!list.includes(cur.id)) { list.push(cur.id); store.set('nsh-gespeeld', list); }
+    const rounds = (Number(store.get('nsh-rondes', 0)) || 0) + 1; store.set('nsh-rondes', rounds);
+    unlock('eerste');
+    if (list.length >= 5) unlock('vijf');
+    if (GAMES.every(g => list.includes(g.id))) unlock('alle');
+    if (rounds >= 100) unlock('honderd');
+    if (new Date().getHours() < 5) unlock('nacht');
+    if (dailyOn) {
+      let days = store.get('nsh-dagen', []); if (!Array.isArray(days)) days = [];
+      if (!days.includes(today)) {
+        days.push(today); days = days.slice(-40); store.set('nsh-dagen', days);
+        track('rpc/track_event', { p_kind: 'dagelijks', p_game: boardId() });
+      }
+      let streak = 0;
+      for (let d = new Date(); days.includes(dayKeyOf(d)); d.setDate(d.getDate() - 1)) streak++;
+      unlock('dag1');
+      if (streak >= 3) unlock('dag3');
+      if (streak >= 7) unlock('dag7');
+    }
+  }
 
   // ---------- welcome ----------
   function showWelcome() {
@@ -660,6 +883,7 @@ window.rrect = function (c, x, y, w, h, r) {
       grid.appendChild(card);
     });
     renderBoard();
+    if (typeof renderDaily === 'function' && $('achGrid')) { renderDaily(); renderAch(); }
   }
 
   // ---------- play ----------
@@ -697,6 +921,7 @@ window.rrect = function (c, x, y, w, h, r) {
       level(n, sub) {
         if (n <= curLevel) return;
         curLevel = n; bannerT = 2; bannerSub = sub || '';
+        if (n >= 5 && cur) unlock('lvl-' + cur.id);
         $('lvl').textContent = n;
         Music.setLevel(n);
         sound(520, .12, 'triangle', .07, 200); setTimeout(() => sound(780, .18, 'triangle', .07, 300), 120);
@@ -730,10 +955,10 @@ window.rrect = function (c, x, y, w, h, r) {
   }
   function renderModes() {
     const box = $('modes'); box.textContent = '';
-    box.hidden = !cur.modes;
-    $('introBoardTitle').textContent = 'Scorebord ' + cur.name + (modeLabel() ? ' \u00b7 ' + modeLabel() : '');
+    box.hidden = !cur.modes || dailyOn;
+    $('introBoardTitle').textContent = dailyOn ? 'Dagklassement' : 'Scorebord ' + cur.name + (modeLabel() ? ' \u00b7 ' + modeLabel() : '');
     $('best').textContent = bestOf(boardId()).toLocaleString('nl-NL');
-    if (!cur.modes) return;
+    if (!cur.modes || dailyOn) return;
     cur.modes.forEach(m => {
       const b = document.createElement('button');
       b.type = 'button'; b.textContent = m.label; b.setAttribute('aria-pressed', String(m.id === modeId));
@@ -745,16 +970,17 @@ window.rrect = function (c, x, y, w, h, r) {
       box.appendChild(b);
     });
   }
-  function openGame(def) {
-    cur = def; inst = null;
+  function openGame(def, daily) {
+    cur = def; inst = null; dailyOn = !!daily;
     modeId = def.modes ? (store.get('nsh-mode-' + def.id, def.modes[0].id)) : null;
-    if (def.modes && !def.modes.some(m => m.id === modeId)) modeId = def.modes[0].id;
+    if (def.modes && (dailyOn || !def.modes.some(m => m.id === modeId))) modeId = def.modes[0].id;
     document.documentElement.style.setProperty('--accent', def.color);
     $('home').hidden = true; $('play').hidden = false;
     state = 'intro';
     $('gameTitle').textContent = def.name;
-    $('introTitle').textContent = def.name;
-    $('introBlurb').textContent = def.blurb;
+    $('introTitle').textContent = dailyOn ? 'Uitdaging: ' + def.name : def.name;
+    $('introBlurb').textContent = dailyOn ? 'Vandaag speelt iedereen ' + def.name + ' met precies dezelfde start. Je score telt voor het dagklassement \u00e9n voor het gewone scorebord. ' + def.blurb : def.blurb;
+    if (dailyOn) loadDaily();
     const how = $('introHow'); how.textContent = '';
     def.how.forEach(t => { const li = document.createElement('li'); li.textContent = t; how.appendChild(li); });
     renderModes();
@@ -765,6 +991,7 @@ window.rrect = function (c, x, y, w, h, r) {
     overlay('intro');
     window.scrollTo(0, 0);
     resize();
+    seedRandom();
     inst = def.create(api());
     $('startBtn').focus();
   }
@@ -775,8 +1002,10 @@ window.rrect = function (c, x, y, w, h, r) {
     curScore = -1; api().score(0);
     sendRound(false);
     resetLevel(); drawErr = ''; playSec = 0; roundOpen = true;
+    seedRandom();
     inst = null; inst = cur.create(api());
     overlay(null);
+    onRoundStart();
     beginCountdown();
     Music.start(cur.music);
     if (useSupa && !isLocal) supa('rpc/count_play', { p_game: boardId() }).catch(() => {});
@@ -791,6 +1020,9 @@ window.rrect = function (c, x, y, w, h, r) {
     buzz([120, 60, 220]);
     const s = curScore, prevBest = bestOf(boardId()), record = s > prevBest;
     if (record) { store.set('nsh-best-' + boardId(), s); $('best').textContent = s.toLocaleString('nl-NL'); }
+    if (record && prevBest > 0) unlock('record');
+    if (playSec >= 600) unlock('marathon');
+    if (dailyOn && s > (Number(store.get('nsh-dagbest-' + today, 0)) || 0)) store.set('nsh-dagbest-' + today, s);
     $('overTitle').textContent = record && s > 0 ? 'Nieuw record!' : 'Game over';
     $('final').textContent = s.toLocaleString('nl-NL');
     lastName = store.get('nsh-name', '');
@@ -811,25 +1043,27 @@ window.rrect = function (c, x, y, w, h, r) {
     $('shareRow').hidden = s <= 0;
     if (s <= 0) return;
     const name = cur.name + (modeLabel() ? ' (' + modeLabel().toLowerCase() + ')' : '');
-    const url = SITE_URL + '#' + boardId();
-    const text = 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in ' + name + ' op Nachtspeelhal. Kun jij dat verslaan?';
+    const url = SITE_URL + '#' + (dailyOn ? 'uitdaging' : boardId());
+    const text = dailyOn
+      ? 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in de uitdaging van vandaag (' + cur.name + ') op Nachtspeelhal. Kun jij dat verslaan?'
+      : 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in ' + name + ' op Nachtspeelhal. Kun jij dat verslaan?';
     shareData = { title: 'Nachtspeelhal', text, url };
     const native = !!navigator.share && coarse;
     $('shareBtn').hidden = !native;
     $('waBtn').hidden = native;
     $('copyBtn').hidden = native;
     $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
-    $('waBtn').onclick = () => track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() });
+    $('waBtn').onclick = () => { track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld'); };
   }
   $('shareBtn').addEventListener('click', async () => {
     if (!shareData) return;
-    try { await navigator.share(shareData); $('shareMsg').textContent = 'Gedeeld!'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); }
+    try { await navigator.share(shareData); $('shareMsg').textContent = 'Gedeeld!'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld'); }
     catch (e) { if (e && e.name !== 'AbortError') $('shareMsg').textContent = 'Delen lukte niet. Kopieer de link hieronder.'; $('copyBtn').hidden = false; }
   });
   $('copyBtn').addEventListener('click', async () => {
     if (!shareData) return;
     const all = shareData.text + ' ' + shareData.url;
-    try { await navigator.clipboard.writeText(all); $('shareMsg').textContent = 'Link gekopieerd. Plak hem in een bericht.'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); }
+    try { await navigator.clipboard.writeText(all); $('shareMsg').textContent = 'Link gekopieerd. Plak hem in een bericht.'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld'); }
     catch (e) { $('shareMsg').textContent = all; }
   });
 
@@ -841,7 +1075,7 @@ window.rrect = function (c, x, y, w, h, r) {
     sendRound(false);
     Music.stop();
     if (fsActive()) exitFs();
-    state = 'home'; inst = null; cur = null; modeId = null;
+    state = 'home'; inst = null; cur = null; modeId = null; dailyOn = false; seedRandom();
     input.keys.clear();
     $('play').hidden = true; $('home').hidden = false;
     renderHome();
@@ -855,8 +1089,13 @@ window.rrect = function (c, x, y, w, h, r) {
     store.set('nsh-name', name); lastName = name;
     $('saveBtn').disabled = true; $('saveMsg').textContent = 'Opslaan…';
     const res = await saveScore(boardId(), name, curScore);
+    let dayRes = null;
+    if (dailyOn) dayRes = await saveDaily(name, curScore);
     if (res.where === 'shared') track('rpc/track_event', { p_kind: 'score_opgeslagen', p_game: boardId() });
-    if (res.where === 'shared') $('saveMsg').textContent = res.kept != null ? `Opgeslagen. Je beste score blijft ${res.kept.toLocaleString('nl-NL')}.` : 'Je staat op het scorebord.';
+    if (!res.error || dayRes === 'shared') unlock('scorebord');
+    if (dailyOn && dayRes === 'shared' && res.where === 'shared') $('saveMsg').textContent = 'Je staat in het dagklassement en op het scorebord.';
+    else if (dailyOn && !res.error) $('saveMsg').textContent = 'Opgeslagen in het dagklassement' + (dayRes === 'shared' ? '' : ' op dit apparaat') + ' en op het scorebord.';
+    else if (res.where === 'shared') $('saveMsg').textContent = res.kept != null ? `Opgeslagen. Je beste score blijft ${res.kept.toLocaleString('nl-NL')}.` : 'Je staat op het scorebord.';
     else if (res.error === 'naam_ongepast') $('saveMsg').textContent = 'Deze naam mag niet. Kies een andere naam.';
     else if (res.error === 'te_vaak') $('saveMsg').textContent = 'Je hebt net al scores ingestuurd. Probeer het over een minuut opnieuw.';
     else if (res.error) $('saveMsg').textContent = 'Opgeslagen op dit apparaat. Het gedeelde scorebord is nu niet bereikbaar.';
@@ -1035,7 +1274,11 @@ window.rrect = function (c, x, y, w, h, r) {
   }
 
   renderHome();
-  if (deepLink && deepLink !== 'spellen') {
+  renderDaily(); renderAch();
+  setInterval(() => { if (!document.hidden && state === 'home') renderDaily(); }, 60000);
+  if (deepLink === 'uitdaging') { showGames(); openGame(dailyGame(today), true); }
+  else if (deepLink === 'prestaties') { showGames(); setTimeout(() => $('prestaties').scrollIntoView(), 50); }
+  else if (deepLink && deepLink !== 'spellen') {
     const g = GAMES.find(d => d.id === deepLink || (d.modes && d.modes.some(m => m.id === deepLink)));
     if (g) {
       if (g.modes && g.id !== deepLink) store.set('nsh-mode-' + g.id, deepLink);
@@ -1073,8 +1316,8 @@ window.rrect = function (c, x, y, w, h, r) {
   setInterval(() => { if (last && performance.now() - last > 400) frame(performance.now()); }, 250);
   initDb();
   if (useSupa) {
-    loadSupa();
-    setInterval(() => { if (!document.hidden) loadSupa(); }, 30000);
+    loadSupa(); loadDaily();
+    setInterval(() => { if (!document.hidden) { loadSupa(); loadDaily(); } }, 30000);
     if ($('contactForm')) {
     $('contactForm').hidden = false;
     $('mailNote').textContent = 'Interesse? Laat hieronder een bericht achter, dan neem ik contact met je op.';
