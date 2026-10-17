@@ -156,6 +156,9 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
 .save { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .save input { width: 12em; max-width: 100%; padding: 9px 12px; border-radius: 99px; border: 1px solid #3a4c58; background: var(--panel); }
 #saveMsg { color: var(--mint); font-size: .9rem; min-height: 1.3em; max-width: 40ch; }
+#shareRow { gap: 8px; }
+#shareRow a { color: inherit; text-decoration: none; display: inline-flex; align-items: center; }
+#shareMsg { font-size: .85rem; color: var(--mint); min-height: 1.2em; }
 #overList { width: min(100%, 380px); text-align: left; }
 .intro-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; width: min(100%, 860px); align-items: start; }
 .intro-main { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
@@ -318,6 +321,12 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
         <button class="play-btn" id="saveBtn" type="submit" style="padding:9px 20px">Op scorebord</button>
       </form>
       <div id="saveMsg" role="status"></div>
+      <div class="row" id="shareRow" hidden>
+        <button class="ghost-btn" id="shareBtn" type="button" hidden>Deel je score</button>
+        <a class="ghost-btn" id="waBtn" href="https://wa.me/" target="_blank" rel="noopener" hidden>Deel via WhatsApp</a>
+        <button class="ghost-btn" id="copyBtn" type="button" hidden>Kopieer link</button>
+      </div>
+      <div id="shareMsg" role="status"></div>
       <span class="source" id="overSource"></span>
       <ol class="scores" id="overList"></ol>
       <div class="row">
@@ -630,6 +639,7 @@ window.rrect = function (c, x, y, w, h, r) {
     });
   })();
   if (location.hash === '#spellen') showGames();
+  const deepLink = location.hash.slice(1);
 
   // ---------- home ----------
   function renderHome() {
@@ -789,11 +799,41 @@ window.rrect = function (c, x, y, w, h, r) {
     $('playerName').value = lastName;
     $('saveBtn').disabled = s <= 0;
     $('saveMsg').textContent = s <= 0 ? 'Haal minstens 1 punt om op het scorebord te komen.' : '';
+    setupShare(s);
     renderBoard();
     overlay('over');
     sound(300, .5, 'triangle', .07, -200);
     setTimeout(() => (lastName ? $('saveBtn') : $('playerName')).focus(), 60);
   }
+  // ---------- share your score ----------
+  const SITE_URL = 'https://dokmannl.github.io/nachtspeelhal/';
+  let shareData = null;
+  function setupShare(s) {
+    $('shareMsg').textContent = '';
+    $('shareRow').hidden = s <= 0;
+    if (s <= 0) return;
+    const name = cur.name + (modeLabel() ? ' (' + modeLabel().toLowerCase() + ')' : '');
+    const url = SITE_URL + '#' + boardId();
+    const text = 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in ' + name + ' op Nachtspeelhal. Kun jij dat verslaan?';
+    shareData = { title: 'Nachtspeelhal', text, url };
+    const native = !!navigator.share && coarse;
+    $('shareBtn').hidden = !native;
+    $('waBtn').hidden = native;
+    $('copyBtn').hidden = native;
+    $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
+  }
+  $('shareBtn').addEventListener('click', async () => {
+    if (!shareData) return;
+    try { await navigator.share(shareData); $('shareMsg').textContent = 'Gedeeld!'; }
+    catch (e) { if (e && e.name !== 'AbortError') $('shareMsg').textContent = 'Delen lukte niet. Kopieer de link hieronder.'; $('copyBtn').hidden = false; }
+  });
+  $('copyBtn').addEventListener('click', async () => {
+    if (!shareData) return;
+    const all = shareData.text + ' ' + shareData.url;
+    try { await navigator.clipboard.writeText(all); $('shareMsg').textContent = 'Link gekopieerd. Plak hem in een bericht.'; }
+    catch (e) { $('shareMsg').textContent = all; }
+  });
+
   function togglePause() {
     if (state === 'playing' || state === 'countdown') { state = 'paused'; overlay('pause'); input.keys.clear(); Music.stop(); $('resumeBtn').focus(); }
     else if (state === 'paused') { overlay(null); beginCountdown(); Music.start(cur.music); cv.focus(); }
@@ -992,6 +1032,13 @@ window.rrect = function (c, x, y, w, h, r) {
   }
 
   renderHome();
+  if (deepLink && deepLink !== 'spellen') {
+    const g = GAMES.find(d => d.id === deepLink || (d.modes && d.modes.some(m => m.id === deepLink)));
+    if (g) {
+      if (g.modes && g.id !== deepLink) store.set('nsh-mode-' + g.id, deepLink);
+      showGames(); openGame(g);
+    }
+  }
   schedule();
   setInterval(() => { if (last && performance.now() - last > 400) frame(performance.now()); }, 250);
   initDb();
