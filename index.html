@@ -484,6 +484,7 @@ window.rrect = function (c, x, y, w, h, r) {
   // shared scoreboard on the public site (the Claude preview uses its own store instead)
   const SUPA = { url: 'https://mcakdvonmliccvqtzsuw.supabase.co', key: 'sb_publishable_N10Mu-RjANOLzRHon0ZwrQ_WX-zdJGY' };
   const useSupa = !(window.claude && window.claude.use);
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
   async function supa(path, body) {
     const r = await fetch(SUPA.url + '/rest/v1/' + path, {
       method: body ? 'POST' : 'GET',
@@ -782,7 +783,7 @@ window.rrect = function (c, x, y, w, h, r) {
     overlay(null);
     beginCountdown();
     Music.start(cur.music);
-    if (useSupa) supa('rpc/count_play', { p_game: boardId() }).catch(() => {});
+    if (useSupa && !isLocal) supa('rpc/count_play', { p_game: boardId() }).catch(() => {});
     cv.focus();
   }
   function beginCountdown() { state = 'countdown'; cdEnd = performance.now() + 3000; cdT = 3; goT = 0; sound(440, .12, 'triangle', .07); }
@@ -1038,6 +1039,22 @@ window.rrect = function (c, x, y, w, h, r) {
       if (g.modes && g.id !== deepLink) store.set('nsh-mode-' + g.id, deepLink);
       showGames(); openGame(g);
     }
+  }
+  // anonymous visit count: page, phone or computer, where the visitor came from, first visit or not
+  if (useSupa && !isLocal) {
+    const ref = (document.referrer || '').toLowerCase();
+    const linked = GAMES.find(d => d.id === deepLink || (d.modes && d.modes.some(m => m.id === deepLink)));
+    const source = ref.includes('google.') ? 'google'
+      : ref.includes('whatsapp') ? 'whatsapp'
+      : (ref.includes('facebook.') || ref.includes('fb.')) ? 'facebook'
+      : linked ? 'gedeelde link'
+      : (!ref || ref.includes(location.hostname)) ? 'direct' : 'anders';
+    const visitor = store.get('nsh-seen', false) ? 'terug' : 'nieuw';
+    store.set('nsh-seen', true);
+    supa('rpc/count_visit', {
+      p_page: linked ? deepLink : (deepLink === 'spellen' ? 'spellen' : 'home'),
+      p_device: coarse ? 'telefoon' : 'computer', p_source: source, p_visitor: visitor
+    }).catch(() => {});
   }
   schedule();
   setInterval(() => { if (last && performance.now() - last > 400) frame(performance.now()); }, 250);

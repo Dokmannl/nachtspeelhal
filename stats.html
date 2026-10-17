@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Nachtspeelhal statistieken</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: owner dashboard. Code gate, then a row of headline tiles, a daily visits chart, and three ranked bar lists. Same night palette as the site. */
+:root {
+  --night: #070b17; --panel: #0f1824; --line: #1f2e3a; --ink: #e8efe4; --muted: #8fa3a0;
+  --glow: #f4d35e; --mint: #9ef0c8; --danger: #e5484d; --grid: rgba(143,163,160,.18);
+  --display: "Fraunces", Georgia, serif; --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--night); color: var(--ink); font: 15px/1.5 var(--body);
+  padding: max(20px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px));
+}
+main { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+h1 { font-family: var(--display); font-style: italic; font-weight: 600; color: var(--glow); margin: 0; font-size: 2.2rem; }
+h2 { margin: 0 0 12px; font-size: 1.05rem; }
+.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+.muted { color: var(--muted); font-size: .9rem; }
+button, input { font: inherit; color: inherit; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.btn-main { background: var(--glow); color: var(--night); border: 0; border-radius: 99px; padding: 10px 22px; font-weight: 700; cursor: pointer; }
+input { padding: 10px 14px; border-radius: 99px; border: 1px solid #3a4c58; background: var(--panel); width: 16em; max-width: 100%; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.gate { display: flex; flex-direction: column; gap: 12px; max-width: 30rem; }
+.gate form { display: flex; flex-wrap: wrap; gap: 8px; }
+#gateMsg { color: var(--danger); min-height: 1.3em; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 12px; }
+.tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.tile span { display: block; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tile b { display: block; font-size: 1.8rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; height: auto; }
+.tip { position: absolute; pointer-events: none; background: #1b2731; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: .85rem; white-space: nowrap; transform: translate(-50%, -110%); }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 8.5em) minmax(0, 1fr) 3.5em; gap: 10px; align-items: center; font-size: .9rem; }
+.bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 12px; }
+.bar-fill { height: 12px; background: var(--glow); border-radius: 0 4px 4px 0; min-width: 2px; }
+.bar-row .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.empty { color: var(--muted); font-size: .9rem; }
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Statistieken</h1>
+    <span class="muted"><a href="./" style="color:inherit">Naar Nachtspeelhal</a></span>
+  </div>
+
+  <section class="gate" id="gate">
+    <p style="margin:0">Deze pagina is alleen voor de beheerder. Vul je beheercode in.</p>
+    <form id="gateForm">
+      <label for="code" class="muted" style="align-self:center">Beheercode</label>
+      <input id="code" autocomplete="current-password" type="password">
+      <button class="btn-main" type="submit">Openen</button>
+    </form>
+    <div id="gateMsg" role="status"></div>
+  </section>
+
+  <div id="dash" hidden>
+    <div class="top" style="margin-bottom:16px">
+      <span class="muted" id="asOf"></span>
+      <span style="display:flex;gap:8px"><button class="btn" id="refresh" type="button">Vernieuwen</button><button class="btn" id="logout" type="button">Uitloggen</button></span>
+    </div>
+    <div class="tiles" id="tiles"></div>
+    <div class="card" style="margin-top:16px">
+      <h2>Bezoeken per dag, laatste 30 dagen</h2>
+      <div class="chart" id="dayChart"></div>
+    </div>
+    <div class="cards" style="margin-top:16px">
+      <div class="card"><h2>Populairste spellen (spelstarts)</h2><div class="bars" id="games"></div></div>
+      <div class="card"><h2>Waar bezoekers vandaan komen</h2><div class="bars" id="sources"></div><h2 style="margin-top:20px">Telefoon of computer</h2><div class="bars" id="devices"></div></div>
+    </div>
+    <p class="muted" style="margin-top:16px">Geteld zonder cookies of persoonsgegevens: alleen aantallen per dag. "Nieuw" = de eerste keer dat iemand de site op dat apparaat opent.</p>
+  </div>
+</main>
+<script>
+(() => {
+  const SUPA = { url: 'https://mcakdvonmliccvqtzsuw.supabase.co', key: 'sb_publishable_N10Mu-RjANOLzRHon0ZwrQ_WX-zdJGY' };
+  const NAMES = { vuurvlieg: 'Vuurvlieg', stuiterbal: 'Stuiterbal', racebaan: 'Racebaan', sprongheld: 'Sprongheld', slang: 'Slang', 'slang-rand': 'Slang (rand)', toren: 'Torenbouwer', sterrenblokken: 'Sterrenblokken', kikkersprong: 'Kikkersprong', lantaarnman: 'Lantaarnman', uilenvlucht: 'Uilenvlucht', spokenjacht: 'Spokenjacht', home: 'Voorpagina', spellen: 'Spellenpagina' };
+  const $ = id => document.getElementById(id);
+  const nf = n => Number(n || 0).toLocaleString('nl-NL');
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} } };
+
+  async function fetchStats(code) {
+    const r = await fetch(SUPA.url + '/rest/v1/rpc/get_stats', { method: 'POST', headers: { apikey: SUPA.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: code }) });
+    const data = await r.json().catch(() => null);
+    if (!r.ok) { const e = new Error(data && data.message || 'fout'); e.code = data && data.message; throw e; }
+    return data;
+  }
+
+  function tiles(t) {
+    const items = [['Bezoeken totaal', t.bezoeken], ['Laatste 7 dagen', t.bezoeken_7d], ['Nieuwe bezoekers', t.nieuw], ['Spelstarts', t.spelstarts], ['Spelers op scorebord', t.spelers], ['Berichten', t.berichten]];
+    $('tiles').textContent = '';
+    for (const [label, v] of items) {
+      const d = document.createElement('div'); d.className = 'tile';
+      const s = document.createElement('span'); s.textContent = label;
+      const b = document.createElement('b'); b.textContent = nf(v);
+      d.append(s, b); $('tiles').appendChild(d);
+    }
+  }
+
+  function bars(el, rows, key, valKey) {
+    el.textContent = '';
+    if (!rows.length) { const p = document.createElement('div'); p.className = 'empty'; p.textContent = 'Nog geen gegevens.'; el.appendChild(p); return; }
+    const max = Math.max(...rows.map(r => Number(r[valKey]) || 0), 1);
+    for (const r of rows) {
+      const row = document.createElement('div'); row.className = 'bar-row';
+      const n = document.createElement('span'); n.className = 'name'; n.textContent = NAMES[r[key]] || r[key];
+      const track = document.createElement('div'); track.className = 'bar-track';
+      const fill = document.createElement('div'); fill.className = 'bar-fill'; fill.style.width = (Number(r[valKey]) / max * 100) + '%';
+      track.appendChild(fill);
+      const v = document.createElement('span'); v.className = 'val'; v.textContent = nf(r[valKey]);
+      row.append(n, track, v); el.appendChild(row);
+    }
+  }
+
+  function dayChart(rows) {
+    const el = $('dayChart'); el.textContent = '';
+    const byDay = new Map(rows.map(r => [r.day, r]));
+    const days = [];
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    for (let i = 29; i >= 0; i--) { const d = new Date(today - i * 864e5); days.push(d.toISOString().slice(0, 10)); }
+    const vals = days.map(d => Number((byDay.get(d) || {}).bezoeken) || 0);
+    const news = days.map(d => Number((byDay.get(d) || {}).nieuw) || 0);
+    const W = 760, H = 240, L = 40, R = 12, T = 16, B = 34, pw = W - L - R, ph = H - T - B;
+    const max = Math.max(...vals, 1), step = Math.max(1, Math.ceil(max / 4)), top = step * Math.ceil(max / step);
+    const y = v => T + ph - v / top * ph, bw = pw / days.length;
+    const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Bezoeken per dag, laatste 30 dagen, hoogste dag ' + max);
+    const mk = (tag, a, txt) => { const n = document.createElementNS(ns, tag); for (const k in a) n.setAttribute(k, a[k]); if (txt != null) n.textContent = txt; svg.appendChild(n); return n; };
+    for (let v = 0; v <= top; v += step) {
+      mk('line', { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: 'rgba(143,163,160,.18)' });
+      mk('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11, fill: '#8fa3a0' }, nf(v));
+    }
+    const label = d => { const [yy, mm, dd] = d.split('-'); return Number(dd) + ' ' + ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'].at(Number(mm) - 1); };
+    const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; el.appendChild(tip);
+    days.forEach((d, i) => {
+      const x = L + i * bw, h = Math.max(0, T + ph - y(vals.at(i)));
+      if (vals.at(i) > 0) {
+        const r = Math.min(4, h / 2);
+        mk('path', { d: `M${x + 2} ${T + ph}V${T + ph - h + r}q0 -${r} ${r} -${r}H${x + bw - 2 - r}q${r} 0 ${r} ${r}V${T + ph}Z`, fill: '#f4d35e' });
+      }
+      if (i % 5 === 4 || i === 29) mk('text', { x: x + bw / 2, y: H - 12, 'text-anchor': 'middle', 'font-size': 11, fill: '#8fa3a0' }, label(d));
+      const hit = mk('rect', { x, y: T, width: bw, height: ph, fill: 'transparent' });
+      const show = () => { tip.hidden = false; tip.textContent = `${label(d)}: ${nf(vals.at(i))} bezoeken, ${nf(news.at(i))} nieuw`; tip.style.left = ((x + bw / 2) / W * 100) + '%'; tip.style.top = (y(vals.at(i)) / H * 100) + '%'; };
+      hit.addEventListener('mouseenter', show); hit.addEventListener('touchstart', show, { passive: true });
+      hit.addEventListener('mouseleave', () => { tip.hidden = true; });
+    });
+    mk('line', { x1: L, x2: W - R, y1: T + ph, y2: T + ph, stroke: '#8fa3a0' });
+    el.insertBefore(svg, tip);
+  }
+
+  async function load(code) {
+    $('gateMsg').textContent = '';
+    try {
+      const s = await fetchStats(code);
+      store.set('nsh-stats-code', code);
+      $('gate').hidden = true; $('dash').hidden = false;
+      tiles(s.totals || {});
+      dayChart(s.visits_by_day || []);
+      bars($('games'), s.plays_by_game || [], 'game', 'starts');
+      bars($('sources'), s.by_source || [], 'source', 'bezoeken');
+      bars($('devices'), s.by_device || [], 'device', 'bezoeken');
+      $('asOf').textContent = 'Bijgewerkt: ' + new Date().toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' });
+    } catch (e) {
+      store.set('nsh-stats-code', null);
+      $('dash').hidden = true; $('gate').hidden = false;
+      $('gateMsg').textContent = e.code === 'code_onjuist' ? 'Deze code klopt niet.' : e.code === 'te_vaak' ? 'Te vaak geprobeerd. Wacht een uur en probeer het opnieuw.' : 'De statistieken konden niet geladen worden. Probeer het later opnieuw.';
+    }
+  }
+  $('gateForm').addEventListener('submit', e => { e.preventDefault(); const c = $('code').value.trim(); if (c) load(c); });
+  $('refresh').addEventListener('click', () => { const c = store.get('nsh-stats-code'); if (c) load(c); });
+  $('logout').addEventListener('click', () => { store.set('nsh-stats-code', null); $('dash').hidden = true; $('gate').hidden = false; $('code').value = ''; });
+  const saved = store.get('nsh-stats-code');
+  if (saved) load(saved);
+})();
+</script>
+</body>
+</html>
