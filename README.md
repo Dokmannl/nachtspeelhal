@@ -1,10 +1,10 @@
 # Nachtspeelhal
 
-Negen arcadespellen bij maanlicht, elk met een eigen scorebord.
+Elf arcadespellen bij maanlicht, elk met een eigen scorebord.
 Speel op https://dokmannl.github.io/nachtspeelhal/
 
 Spellen: Vuurvlieg, Stuiterbal, Racebaan, Sprongheld, Slang, Torenbouwer,
-Sterrenblokken, Kikkersprong en Lantaarnman.
+Sterrenblokken, Kikkersprong, Lantaarnman, Uilenvlucht en Spokenjacht.
 
 Alles draait in de browser: HTML, CSS en JavaScript zonder bibliotheken.
 De muziek wordt in de browser gemaakt met Web Audio.

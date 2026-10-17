@@ -248,8 +248,8 @@ GAMES.push({
             const wx = L.dir > 0 ? it.x + it.w - R * .5 : it.x + R * .15;
             ctx.fillRect(wx, y + R * .25, R * .35, R * .5);
             const hx = L.dir > 0 ? it.x + it.w : it.x;
-            ctx.fillStyle = 'rgba(255,246,200,.16)';
-            ctx.beginPath(); ctx.moveTo(hx, y + R * .3); ctx.lineTo(hx + L.dir * R * 1.1, y + R * .05); ctx.lineTo(hx + L.dir * R * 1.1, y + R * .95); ctx.lineTo(hx, y + R * .7); ctx.fill();
+            ctx.fillStyle = 'rgba(255,246,200,.08)';
+            ctx.beginPath(); ctx.moveTo(hx, y + R * .35); ctx.lineTo(hx + L.dir * R * .7, y + R * .2); ctx.lineTo(hx + L.dir * R * .7, y + R * .8); ctx.lineTo(hx, y + R * .65); ctx.fill();
             ctx.fillStyle = '#fff6c8'; ctx.fillRect(hx - (L.dir > 0 ? 3 : 0), y + R * .22, 3, R * .14); ctx.fillRect(hx - (L.dir > 0 ? 3 : 0), y + R * .64, 3, R * .14);
           } else if (L.kind === 'log') {
             ctx.fillStyle = '#7a5236'; rrect(ctx, it.x, y + R * .14, it.w, R * .72, R * .3); ctx.fill();

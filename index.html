@@ -4,8 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Nachtspeelhal</title>
-<meta name="description" content="Negen gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
+<meta name="description" content="Elf gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
 <meta name="theme-color" content="#070b17">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nachtspeelhal">
+<meta property="og:description" content="Elf gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
+<meta property="og:url" content="https://dokmannl.github.io/nachtspeelhal/">
+<meta property="og:image" content="https://dokmannl.github.io/nachtspeelhal/deel.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="nl_NL">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -63,7 +72,7 @@ button:focus-visible, input:focus-visible, .card:focus-visible { outline: 2px so
 .w-hero { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
 .w-hero .logo { width: min(100%, 600px); margin: 0 auto; }
 .w-hero p { margin: 0; color: var(--muted); max-width: 50ch; line-height: 1.6; font-size: 1.1rem; }
-.strip { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.strip { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 8px; width: 100%; }
 .strip canvas { width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; border: 1px solid var(--line); display: block; }
 @media (max-width: 640px) { .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .sale { border: 1px solid var(--glow); border-radius: 16px; padding: 22px 24px; background: rgba(244, 211, 94, .05); display: flex; flex-direction: column; gap: 12px; }
@@ -75,6 +84,12 @@ button:focus-visible, input:focus-visible, .card:focus-visible { outline: 2px so
 .legal h2 { font-size: 1.25rem; color: var(--ink); }
 .legal ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
 .copy { color: var(--muted); font-size: .8rem; text-align: center; }
+.contact { display: flex; flex-direction: column; gap: 10px; }
+.cf-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+.contact label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); min-width: 0; }
+.contact input, .contact textarea { padding: 9px 12px; border-radius: 10px; border: 1px solid #3a4c58; background: var(--panel); color: var(--ink); font: inherit; resize: vertical; }
+.contact .row { justify-content: flex-start; }
+#cfStatus { font-size: .9rem; color: var(--mint); }
 .hero h1 { margin: 0; font-size: clamp(2.6rem, 8vw, 4.6rem); line-height: 1; color: var(--glow); text-shadow: 0 0 30px rgba(244, 211, 94, .35); text-wrap: balance; }
 .hero p { margin: 0; color: var(--muted); max-width: 52ch; line-height: 1.55; font-size: 1.05rem; }
 .eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
@@ -155,6 +170,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
   background: rgba(15, 24, 36, .55); font-size: 1.3rem; font-weight: 700;
 }
 #pad button.on { background: rgba(244, 211, 94, .35); }
+.bar .short { display: none; }
 .modes button { border: 1px solid #3a4c58; background: transparent; border-radius: 99px; padding: 8px 16px; color: var(--muted); }
 .modes button[aria-pressed="true"] { background: var(--panel); color: var(--ink); border-color: var(--accent, var(--glow)); }
 #play.fs { position: relative; padding: 0; gap: 0; background: #05080f; }
@@ -171,6 +187,16 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
 #play.fs #pause { margin-left: auto; }
 #play.fs .stage { border-radius: 0; border: 0; }
 @media (max-width: 520px) {
+  #play { gap: 6px; padding-block: 6px; }
+  .bar { gap: 6px 10px; }
+  .bar .btn { padding: 5px 9px; font-size: .82rem; }
+  .bar .st, .bar .long { display: none; }
+  .bar .short { display: inline; }
+  .bar .btn[aria-pressed="false"] { opacity: .55; text-decoration: line-through; }
+  .stat b { font-size: 1.05rem; }
+  #pad { padding: 8px; }
+  #pad, #pad .grp { gap: 6px; }
+  #pad button { min-width: 52px; height: 58px; font-size: 1.1rem; padding: 0 8px; }
   .bar h2 { font-size: 1.2rem; width: 100%; }
   .scores li { grid-template-columns: 2em 1fr auto; }
   .scores .when { display: none; }
@@ -181,7 +207,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
 <main id="welkom">
   <section class="w-hero">
     <h1 style="margin:0;width:100%"><span class="logo-slot" data-size="big" role="img" aria-label="Nachtspeelhal"></span></h1>
-    <p>Negen arcadespellen bij maanlicht. Gratis, zonder reclame, met een eigen scorebord per spel. Speel met toetsenbord, muis of je vinger.</p>
+    <p>Elf arcadespellen bij maanlicht. Gratis, zonder reclame, met een eigen scorebord per spel. Speel met toetsenbord, muis of je vinger.</p>
     <button class="play-btn" id="toGames" type="button">Naar de spellen</button>
     <div class="strip" id="strip" aria-hidden="true"></div>
   </section>
@@ -190,12 +216,20 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <h2 class="display" id="saleTitle">Deze site is te koop</h2>
     <p>Nachtspeelhal is te koop als compleet pakket. Klaar om over te nemen en verder uit te bouwen.</p>
     <ul>
-      <li>Negen eigen spellen, met levels, muziek en bediening voor telefoon en computer</li>
+      <li>Elf eigen spellen, met levels, muziek en bediening voor telefoon en computer</li>
       <li>Een scorebord per spel</li>
       <li>Eigen ontwerp en logo</li>
       <li>Het domein, zodra dat geregistreerd is</li>
     </ul>
-    <p class="mail">Interesse? Het e-mailadres voor contact volgt binnenkort.</p>
+    <p class="mail" id="mailNote">Interesse? Het e-mailadres voor contact volgt binnenkort.</p>
+    <form class="contact" id="contactForm" hidden>
+      <div class="cf-row">
+        <label for="cfName">Naam<input id="cfName" maxlength="60" autocomplete="name"></label>
+        <label for="cfContact">E-mail of telefoon<input id="cfContact" maxlength="120" autocomplete="email"></label>
+      </div>
+      <label for="cfMsg">Bericht<textarea id="cfMsg" rows="4" maxlength="2000"></textarea></label>
+      <div class="row"><button class="play-btn" type="submit" id="cfSend">Verstuur bericht</button><span id="cfStatus" role="status"></span></div>
+    </form>
   </section>
 
   <section class="legal" aria-labelledby="legalTitle">
@@ -203,6 +237,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <ul>
       <li>De spellen op deze site zijn gratis en alleen bedoeld voor plezier. Er wordt niet met geld gespeeld en er valt niets te winnen.</li>
       <li>Op het scorebord staat alleen de naam die je zelf invult, met je score en de datum. Er worden geen andere persoonsgegevens verzameld.</li>
+      <li>Scores, berichten via het contactformulier en anonieme spelcijfers (hoe vaak een spel gestart wordt) worden opgeslagen bij Supabase, op servers in de EU. Berichten worden alleen gebruikt om je te antwoorden.</li>
       <li>De site bewaart alleen je instellingen (geluid, muziek, je naam en je records) in je eigen browser. Er zijn geen reclame- of volgcookies.</li>
       <li>De spellen zijn eigen versies, geïnspireerd op bekende klassiekers. De muziek wordt in de browser zelf gemaakt.</li>
       <li>Aan de site, de spellen en de scores kunnen geen rechten worden ontleend. Scores die niet kloppen of ongepaste namen kunnen zonder melding worden verwijderd.</li>
@@ -219,7 +254,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
       <h1 style="margin:0" class="logo-small"><span class="logo-slot" data-size="small" role="img" aria-label="Nachtspeelhal"></span></h1>
       <button class="btn" id="toWelcome" type="button">Over deze site</button>
     </div>
-    <span class="eyebrow">Negen spellen · elk met een eigen scorebord</span>
+    <span class="eyebrow">Elf spellen · elk met een eigen scorebord</span>
     <p>Kies een spel, haal een zo hoog mogelijke score en zet je naam op het scorebord. Werkt met toetsenbord, muis of je vinger.</p>
   </section>
 
@@ -243,7 +278,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <button class="btn" id="pause" type="button">Pauze</button>
     <button class="btn" id="sound" type="button" aria-pressed="false">Geluid: uit</button>
     <button class="btn" id="music" type="button" aria-pressed="false">Muziek: uit</button>
-    <button class="btn" id="fsBtn" type="button" hidden>Volledig scherm</button>
+    <button class="btn" id="fsBtn" type="button" hidden><span class="long">Volledig</span><span class="short">Vol</span> scherm</button>
   </div>
   <div class="stage">
     <canvas id="cv" tabindex="0" aria-label="Speelveld"></canvas>
@@ -316,6 +351,8 @@ window.rrect = function (c, x, y, w, h, r) {
 <script src="games/sterrenblokken.js"></script>
 <script src="games/kikkersprong.js"></script>
 <script src="games/lantaarnman.js"></script>
+<script src="games/uilenvlucht.js"></script>
+<script src="games/spokenjacht.js"></script>
 <script>
 (() => {
   const $ = id => document.getElementById(id);
@@ -328,7 +365,7 @@ window.rrect = function (c, x, y, w, h, r) {
   const fmtDate = ts => { try { return ts ? new Date(ts).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : ''; } catch (e) { return ''; } };
 
   // ---------- sound ----------
-  let actx = null, soundOn = !!store.get('nsh-sound', true), musicOn = !!store.get('nsh-music', true);
+  let actx = null, soundOn = !!store.get('nsh-sound', true), musicOn = !!store.get('nsh-music', false);
   function ensureAudio() {
     if (!soundOn && !musicOn) return;
     if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { soundOn = false; } }
@@ -347,8 +384,8 @@ window.rrect = function (c, x, y, w, h, r) {
     } catch (e) {}
   }
   function syncSound() {
-    $('sound').textContent = soundOn ? 'Geluid: aan' : 'Geluid: uit'; $('sound').setAttribute('aria-pressed', String(soundOn));
-    $('music').textContent = musicOn ? 'Muziek: aan' : 'Muziek: uit'; $('music').setAttribute('aria-pressed', String(musicOn));
+    $('sound').innerHTML = 'Geluid<span class="st">: ' + (soundOn ? 'aan' : 'uit') + '</span>'; $('sound').setAttribute('aria-pressed', String(soundOn));
+    $('music').innerHTML = 'Muziek<span class="st">: ' + (musicOn ? 'aan' : 'uit') + '</span>'; $('music').setAttribute('aria-pressed', String(musicOn));
   }
   $('sound').addEventListener('click', () => { soundOn = !soundOn; store.set('nsh-sound', soundOn); ensureAudio(); syncSound(); $('cv').focus(); });
   $('music').addEventListener('click', () => {
@@ -435,6 +472,27 @@ window.rrect = function (c, x, y, w, h, r) {
 
   // ---------- scores ----------
   let db = null, shared = null, canWrite = true;
+  // shared scoreboard on the public site (the Claude preview uses its own store instead)
+  const SUPA = { url: 'https://mcakdvonmliccvqtzsuw.supabase.co', key: 'sb_publishable_N10Mu-RjANOLzRHon0ZwrQ_WX-zdJGY' };
+  const useSupa = !(window.claude && window.claude.use);
+  async function supa(path, body) {
+    const r = await fetch(SUPA.url + '/rest/v1/' + path, {
+      method: body ? 'POST' : 'GET',
+      headers: { apikey: SUPA.key, 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const txt = await r.text();
+    let data = null; try { data = txt ? JSON.parse(txt) : null; } catch (e) {}
+    if (!r.ok) { const err = new Error((data && data.message) || ('http_' + r.status)); err.code = data && data.message; throw err; }
+    return data;
+  }
+  async function loadSupa() {
+    try {
+      const rows = await supa('top_scores?select=game,name,score,at');
+      shared = (rows || []).map(r => clean({ game: r.game, name: r.name, score: r.score, at: Date.parse(r.at) })).filter(Boolean);
+      renderBoard();
+    } catch (e) {}
+  }
   let local = store.get('nsh-scores', {});
   if (!local || typeof local !== 'object') local = {};
   function clean(s) {
@@ -461,6 +519,13 @@ window.rrect = function (c, x, y, w, h, r) {
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'speler';
   async function saveScore(id, name, score) {
     addLocal(id, name, score);
+    if (useSupa) {
+      try {
+        const res = await supa('rpc/submit_score', { p_game: id, p_name: name, p_score: score });
+        await loadSupa();
+        return { where: 'shared', kept: res && !res.improved ? res.best : null };
+      } catch (e) { return { where: 'local', error: e.code || 'netwerk' }; }
+    }
     if (!db || !canWrite) return { where: 'local' };
     const ref = db.doc('scores/' + id + '--' + slug(name));
     try {
@@ -707,6 +772,7 @@ window.rrect = function (c, x, y, w, h, r) {
     overlay(null);
     beginCountdown();
     Music.start(cur.music);
+    if (useSupa) supa('rpc/count_play', { p_game: boardId() }).catch(() => {});
     cv.focus();
   }
   function beginCountdown() { state = 'countdown'; cdEnd = performance.now() + 3000; cdT = 3; goT = 0; sound(440, .12, 'triangle', .07); }
@@ -750,7 +816,11 @@ window.rrect = function (c, x, y, w, h, r) {
     $('saveBtn').disabled = true; $('saveMsg').textContent = 'Opslaan…';
     const res = await saveScore(boardId(), name, curScore);
     if (res.where === 'shared') $('saveMsg').textContent = res.kept != null ? `Opgeslagen. Je beste score blijft ${res.kept.toLocaleString('nl-NL')}.` : 'Je staat op het scorebord.';
+    else if (res.error === 'naam_ongepast') $('saveMsg').textContent = 'Deze naam mag niet. Kies een andere naam.';
+    else if (res.error === 'te_vaak') $('saveMsg').textContent = 'Je hebt net al scores ingestuurd. Probeer het over een minuut opnieuw.';
+    else if (res.error) $('saveMsg').textContent = 'Opgeslagen op dit apparaat. Het gedeelde scorebord is nu niet bereikbaar.';
     else $('saveMsg').textContent = db ? 'Opgeslagen op dit apparaat. Het gedeelde scorebord kun je met deze link niet aanpassen.' : 'Opgeslagen op dit apparaat.';
+    if (res.error === 'naam_ongepast' || res.error === 'te_vaak') $('saveBtn').disabled = false;
     renderBoard();
     $('againBtn').focus();
   });
@@ -778,7 +848,7 @@ window.rrect = function (c, x, y, w, h, r) {
   function onFs() {
     const on = fsActive();
     playEl.classList.toggle('fs', on);
-    $('fsBtn').textContent = on ? 'Klein scherm' : 'Volledig scherm';
+    $('fsBtn').innerHTML = on ? 'Klein scherm' : '<span class="long">Volledig</span><span class="short">Vol</span> scherm';
     setTimeout(resize, 60);
   }
   document.addEventListener('fullscreenchange', onFs);
@@ -925,6 +995,29 @@ window.rrect = function (c, x, y, w, h, r) {
   schedule();
   setInterval(() => { if (last && performance.now() - last > 400) frame(performance.now()); }, 250);
   initDb();
+  if (useSupa) {
+    loadSupa();
+    setInterval(() => { if (!document.hidden) loadSupa(); }, 30000);
+    $('contactForm').hidden = false;
+    $('mailNote').textContent = 'Interesse? Laat hieronder een bericht achter, dan neem ik contact met je op.';
+    $('contactForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = $('cfName').value.trim(), contact = $('cfContact').value.trim(), msg = $('cfMsg').value.trim();
+      const st = $('cfStatus');
+      if (!name) { st.textContent = 'Vul je naam in.'; $('cfName').focus(); return; }
+      if (contact.length < 3) { st.textContent = 'Vul een e-mailadres of telefoonnummer in.'; $('cfContact').focus(); return; }
+      if (msg.length < 5) { st.textContent = 'Schrijf een kort bericht.'; $('cfMsg').focus(); return; }
+      $('cfSend').disabled = true; st.textContent = 'Versturen\u2026';
+      try {
+        await supa('rpc/send_message', { p_name: name, p_contact: contact, p_message: msg });
+        st.textContent = 'Bedankt! Je bericht is verstuurd.';
+        $('cfName').value = ''; $('cfContact').value = ''; $('cfMsg').value = '';
+      } catch (err) {
+        st.textContent = err.code === 'te_vaak' ? 'Je hebt al een paar berichten gestuurd. Probeer het later opnieuw.' : 'Versturen lukte niet. Probeer het later opnieuw.';
+      }
+      $('cfSend').disabled = false;
+    });
+  }
 })();
 </script>
 </body>
