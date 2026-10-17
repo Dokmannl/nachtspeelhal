@@ -1,0 +1,931 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nachtspeelhal</title>
+<meta name="description" content="Negen gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
+<meta name="theme-color" content="#070b17">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+/* Layout: arcade hall at night. Home = hero + game cabinet grid, each cabinet with its own top 3; Play = slim HUD bar over a full-height canvas. Single dark theme by choice. */
+:root {
+  --night: #070b17;
+  --panel: #0f1824;
+  --line: #1f2e3a;
+  --ink: #e8efe4;
+  --muted: #8fa3a0;
+  --glow: #f4d35e;
+  --ember: #ff8c42;
+  --mint: #9ef0c8;
+  --danger: #e5484d;
+  --display: "Fraunces", Georgia, serif;
+  --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body {
+  background: var(--night);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+}
+*, *::before, *::after { box-sizing: inherit; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, .card:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 8px; padding: 7px 12px; }
+.btn:hover { border-color: #33495a; }
+.play-btn {
+  font-size: 1.05rem; font-weight: 700;
+  background: var(--glow); color: var(--night); border: 0;
+  padding: 11px 26px; border-radius: 99px;
+  box-shadow: 0 0 26px rgba(244, 211, 94, .45);
+}
+.ghost-btn { background: transparent; border: 1px solid #3a4c58; border-radius: 99px; padding: 10px 20px; }
+.display { font-family: var(--display); font-style: italic; font-weight: 600; }
+
+/* ---------- home ---------- */
+#home { max-width: 1080px; margin: 0 auto; padding-block: 28px 48px; display: flex; flex-direction: column; gap: 40px; }
+.hero { display: flex; flex-direction: column; gap: 10px; }
+.hero-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.logo { display: block; width: 100%; height: auto; }
+.logo-small { width: min(100%, 340px); }
+#welkom { max-width: 860px; margin: 0 auto; padding-block: 36px 48px; display: flex; flex-direction: column; gap: 36px; }
+.w-hero { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
+.w-hero .logo { width: min(100%, 600px); margin: 0 auto; }
+.w-hero p { margin: 0; color: var(--muted); max-width: 50ch; line-height: 1.6; font-size: 1.1rem; }
+.strip { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.strip canvas { width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; border: 1px solid var(--line); display: block; }
+@media (max-width: 640px) { .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.sale { border: 1px solid var(--glow); border-radius: 16px; padding: 22px 24px; background: rgba(244, 211, 94, .05); display: flex; flex-direction: column; gap: 12px; }
+.sale h2, .legal h2 { margin: 0; font-size: 1.6rem; color: var(--glow); }
+.sale p, .legal p, .legal li { margin: 0; line-height: 1.6; max-width: 65ch; }
+.sale ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+.sale .mail { color: var(--muted); font-size: .95rem; }
+.legal { display: flex; flex-direction: column; gap: 10px; color: var(--muted); font-size: .92rem; }
+.legal h2 { font-size: 1.25rem; color: var(--ink); }
+.legal ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; }
+.copy { color: var(--muted); font-size: .8rem; text-align: center; }
+.hero h1 { margin: 0; font-size: clamp(2.6rem, 8vw, 4.6rem); line-height: 1; color: var(--glow); text-shadow: 0 0 30px rgba(244, 211, 94, .35); text-wrap: balance; }
+.hero p { margin: 0; color: var(--muted); max-width: 52ch; line-height: 1.55; font-size: 1.05rem; }
+.eyebrow { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+h2.section { font-size: 1.7rem; margin: 0; color: var(--ink); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 18px; }
+.card {
+  display: flex; flex-direction: column; text-align: left; padding: 0; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  transition: transform .15s ease, border-color .15s ease;
+}
+.card:hover { transform: translateY(-3px); border-color: var(--accent, var(--glow)); }
+.card canvas { display: block; width: 100%; aspect-ratio: 16 / 9; max-width: 100%; }
+.card .body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; }
+.card h3 { margin: 0; font-size: 1.35rem; color: var(--accent, var(--glow)); }
+.card p { margin: 0; color: var(--muted); line-height: 1.45; }
+.card .best { margin-top: 4px; font-size: .85rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.source { font-size: .85rem; color: var(--muted); }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tab { border: 1px solid var(--line); background: transparent; border-radius: 99px; padding: 6px 14px; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); border-color: var(--glow); }
+.scores { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--panel); }
+.scores li { display: grid; grid-template-columns: 2.4em 1fr auto auto; gap: 12px; align-items: center; padding: 10px 16px; border-top: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.scores li:first-child { border-top: 0; }
+.scores .rank { color: var(--muted); }
+.scores li:nth-child(1) .rank { color: var(--glow); font-weight: 700; }
+.scores li:nth-child(2) .rank, .scores li:nth-child(3) .rank { color: var(--ember); font-weight: 700; }
+.scores .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scores .pts { font-weight: 700; }
+.scores .when { color: var(--muted); font-size: .8rem; min-width: 4.5em; text-align: right; }
+.scores li.me { background: rgba(244, 211, 94, .08); }
+.scores .empty { display: block; color: var(--muted); padding: 18px 16px; }
+.scores.mini li { padding: 6px 12px; gap: 10px; grid-template-columns: 1.6em 1fr auto; font-size: .9rem; }
+.scores.mini .when { display: none; }
+.scores.mini .empty { padding: 10px 12px; font-size: .85rem; }
+.mini-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; }
+.card .go { align-self: flex-start; margin-top: 6px; }
+footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70ch; }
+
+/* ---------- play ---------- */
+#play { height: 100%; display: flex; flex-direction: column; gap: 10px; padding-block: 10px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; }
+.bar h2 { margin: 0; font-size: 1.5rem; color: var(--accent, var(--glow)); margin-right: auto; }
+.stat { display: flex; flex-direction: column; line-height: 1.1; min-width: 3.5em; }
+.stat span { font-size: .66rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.stat b { font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+#info { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.meter { width: 110px; height: 10px; border-radius: 99px; background: #1b2731; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, var(--ember), var(--glow)); }
+.meter.low i { background: var(--danger); }
+.stage { position: relative; flex: 1; min-height: 0; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #05080f; }
+#cv { display: block; width: 100%; height: 100%; touch-action: none; outline: none; }
+.overlay {
+  position: absolute; inset: 0; overflow-y: auto;
+  display: flex; flex-direction: column; align-items: center; justify-content: safe center;
+  gap: 14px; text-align: center; padding: 20px;
+  background: rgba(7, 11, 23, .78);
+}
+.overlay h3 { font-size: clamp(2rem, 7vw, 3.2rem); margin: 0; color: var(--accent, var(--glow)); text-wrap: balance; }
+.overlay p { margin: 0; max-width: 40ch; line-height: 1.5; }
+.how { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; color: var(--muted); max-width: 44ch; }
+.big { font-size: 3.2rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: center; }
+.save { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.save input { width: 12em; max-width: 100%; padding: 9px 12px; border-radius: 99px; border: 1px solid #3a4c58; background: var(--panel); }
+#saveMsg { color: var(--mint); font-size: .9rem; min-height: 1.3em; max-width: 40ch; }
+#overList { width: min(100%, 380px); text-align: left; }
+.intro-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; width: min(100%, 860px); align-items: start; }
+.intro-main { display: flex; flex-direction: column; align-items: center; gap: 14px; min-width: 0; }
+.intro-board { display: flex; flex-direction: column; gap: 8px; text-align: left; min-width: 0; }
+.intro-board h4 { margin: 0; font-size: 1.3rem; color: var(--accent, var(--glow)); }
+@media (min-width: 760px) { .intro-grid { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); } }
+#pad { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 10px; padding: 12px; pointer-events: none; }
+#pad .grp { display: flex; gap: 10px; }
+#pad button {
+  pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none;
+  min-width: 64px; height: 64px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, .18);
+  background: rgba(15, 24, 36, .55); font-size: 1.3rem; font-weight: 700;
+}
+#pad button.on { background: rgba(244, 211, 94, .35); }
+.modes button { border: 1px solid #3a4c58; background: transparent; border-radius: 99px; padding: 8px 16px; color: var(--muted); }
+.modes button[aria-pressed="true"] { background: var(--panel); color: var(--ink); border-color: var(--accent, var(--glow)); }
+#play.fs { position: relative; padding: 0; gap: 0; background: #05080f; }
+#play.fs .bar {
+  position: absolute; z-index: 6; flex-wrap: nowrap; gap: 6px 14px;
+  top: calc(env(safe-area-inset-top, 0px) + 6px);
+  left: calc(env(safe-area-inset-left, 0px) + 8px);
+  right: calc(env(safe-area-inset-right, 0px) + 8px);
+  padding: 4px 8px; border-radius: 10px; background: rgba(7, 11, 23, .55);
+}
+#play.fs .bar h2, #play.fs #back, #play.fs #sound, #play.fs #music, #play.fs #info { display: none; }
+#play.fs .bar .stat b { font-size: 1rem; }
+#play.fs .bar .btn { padding: 4px 10px; font-size: .85rem; }
+#play.fs #pause { margin-left: auto; }
+#play.fs .stage { border-radius: 0; border: 0; }
+@media (max-width: 520px) {
+  .bar h2 { font-size: 1.2rem; width: 100%; }
+  .scores li { grid-template-columns: 2em 1fr auto; }
+  .scores .when { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+</style>
+
+<main id="welkom">
+  <section class="w-hero">
+    <h1 style="margin:0;width:100%"><span class="logo-slot" data-size="big" role="img" aria-label="Nachtspeelhal"></span></h1>
+    <p>Negen arcadespellen bij maanlicht. Gratis, zonder reclame, met een eigen scorebord per spel. Speel met toetsenbord, muis of je vinger.</p>
+    <button class="play-btn" id="toGames" type="button">Naar de spellen</button>
+    <div class="strip" id="strip" aria-hidden="true"></div>
+  </section>
+
+  <section class="sale" aria-labelledby="saleTitle">
+    <h2 class="display" id="saleTitle">Deze site is te koop</h2>
+    <p>Nachtspeelhal is te koop als compleet pakket. Klaar om over te nemen en verder uit te bouwen.</p>
+    <ul>
+      <li>Negen eigen spellen, met levels, muziek en bediening voor telefoon en computer</li>
+      <li>Een scorebord per spel</li>
+      <li>Eigen ontwerp en logo</li>
+      <li>Het domein, zodra dat geregistreerd is</li>
+    </ul>
+    <p class="mail">Interesse? Het e-mailadres voor contact volgt binnenkort.</p>
+  </section>
+
+  <section class="legal" aria-labelledby="legalTitle">
+    <h2 id="legalTitle">Disclaimer</h2>
+    <ul>
+      <li>De spellen op deze site zijn gratis en alleen bedoeld voor plezier. Er wordt niet met geld gespeeld en er valt niets te winnen.</li>
+      <li>Op het scorebord staat alleen de naam die je zelf invult, met je score en de datum. Er worden geen andere persoonsgegevens verzameld.</li>
+      <li>De site bewaart alleen je instellingen (geluid, muziek, je naam en je records) in je eigen browser. Er zijn geen reclame- of volgcookies.</li>
+      <li>De spellen zijn eigen versies, geïnspireerd op bekende klassiekers. De muziek wordt in de browser zelf gemaakt.</li>
+      <li>Aan de site, de spellen en de scores kunnen geen rechten worden ontleend. Scores die niet kloppen of ongepaste namen kunnen zonder melding worden verwijderd.</li>
+      <li>Gebruik van de site is op eigen risico. De eigenaar is niet aansprakelijk voor schade door het gebruik ervan.</li>
+    </ul>
+  </section>
+
+  <p class="copy">© 2026 Nachtspeelhal</p>
+</main>
+
+<main id="home" hidden>
+  <section class="hero">
+    <div class="hero-top">
+      <h1 style="margin:0" class="logo-small"><span class="logo-slot" data-size="small" role="img" aria-label="Nachtspeelhal"></span></h1>
+      <button class="btn" id="toWelcome" type="button">Over deze site</button>
+    </div>
+    <span class="eyebrow">Negen spellen · elk met een eigen scorebord</span>
+    <p>Kies een spel, haal een zo hoog mogelijke score en zet je naam op het scorebord. Werkt met toetsenbord, muis of je vinger.</p>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:16px" aria-labelledby="gamesTitle">
+    <h2 class="section display" id="gamesTitle">Spellen</h2>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer id="foot">Elk spel heeft een eigen scorebord met de top 10, te zien als je het spel opent. Per naam telt alleen je beste score.</footer>
+</main>
+
+<div id="play" hidden>
+  <div class="bar">
+    <button class="btn" id="back" type="button">← Alle spellen</button>
+    <h2 class="display" id="gameTitle">Spel</h2>
+    <div class="stat"><span>Score</span><b id="score">0</b></div>
+    <div class="stat"><span>Level</span><b id="lvl">1</b></div>
+    <div class="stat"><span>Record</span><b id="best">0</b></div>
+    <div class="stat" id="meterWrap" hidden><span id="meterLabel">Gloed</span><div class="meter" id="meter"><i id="bar"></i></div></div>
+    <span id="info"></span>
+    <button class="btn" id="pause" type="button">Pauze</button>
+    <button class="btn" id="sound" type="button" aria-pressed="false">Geluid: uit</button>
+    <button class="btn" id="music" type="button" aria-pressed="false">Muziek: uit</button>
+    <button class="btn" id="fsBtn" type="button" hidden>Volledig scherm</button>
+  </div>
+  <div class="stage">
+    <canvas id="cv" tabindex="0" aria-label="Speelveld"></canvas>
+    <div id="pad" hidden></div>
+
+    <div class="overlay" id="ovIntro">
+      <div class="intro-grid">
+        <div class="intro-main">
+          <h3 class="display" id="introTitle">Spel</h3>
+          <p id="introBlurb"></p>
+          <ul class="how" id="introHow"></ul>
+          <div class="row modes" id="modes" role="group" aria-label="Spelvorm" hidden></div>
+          <button class="play-btn" id="startBtn" type="button">Start</button>
+        </div>
+        <div class="intro-board">
+          <h4 class="display" id="introBoardTitle">Scorebord</h4>
+          <span class="source" id="introSource"></span>
+          <ol class="scores" id="introList"></ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="ovPause" hidden>
+      <h3 class="display">Pauze</h3>
+      <div class="row">
+        <button class="play-btn" id="resumeBtn" type="button">Verder</button>
+        <button class="ghost-btn" id="quitBtn" type="button">Stoppen</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="ovOver" hidden>
+      <h3 class="display" id="overTitle">Game over</h3>
+      <div class="big" id="final">0</div>
+      <form class="save" id="saveForm">
+        <label for="playerName" class="eyebrow" style="align-self:center">Je naam</label>
+        <input id="playerName" maxlength="16" autocomplete="nickname" placeholder="Bijv. Dokman">
+        <button class="play-btn" id="saveBtn" type="submit" style="padding:9px 20px">Op scorebord</button>
+      </form>
+      <div id="saveMsg" role="status"></div>
+      <span class="source" id="overSource"></span>
+      <ol class="scores" id="overList"></ol>
+      <div class="row">
+        <button class="play-btn" id="againBtn" type="button">Nog een keer</button>
+        <button class="ghost-btn" id="otherBtn" type="button">Ander spel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.GAMES = [];
+// shared drawing helper for all games
+window.rrect = function (c, x, y, w, h, r) {
+  r = Math.max(0, Math.min(r, w / 2, h / 2));
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+};
+</script>
+<script src="games/vuurvlieg.js"></script>
+<script src="games/stuiterbal.js"></script>
+<script src="games/racebaan.js"></script>
+<script src="games/sprongheld.js"></script>
+<script src="games/slang.js"></script>
+<script src="games/toren.js"></script>
+<script src="games/sterrenblokken.js"></script>
+<script src="games/kikkersprong.js"></script>
+<script src="games/lantaarnman.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  };
+  const fmtDate = ts => { try { return ts ? new Date(ts).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : ''; } catch (e) { return ''; } };
+
+  // ---------- sound ----------
+  let actx = null, soundOn = !!store.get('nsh-sound', true), musicOn = !!store.get('nsh-music', true);
+  function ensureAudio() {
+    if (!soundOn && !musicOn) return;
+    if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { soundOn = false; } }
+    if (actx && actx.state === 'suspended') actx.resume();
+  }
+  function sound(freq, dur = .12, type = 'sine', vol = .07, slide = 0) {
+    if (!soundOn || !actx) return;
+    try {
+      const o = actx.createOscillator(), g = actx.createGain(), now = actx.currentTime;
+      o.type = type; o.frequency.setValueAtTime(freq, now);
+      if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, freq + slide), now + dur);
+      g.gain.setValueAtTime(vol, now);
+      g.gain.exponentialRampToValueAtTime(.0001, now + dur);
+      o.connect(g).connect(actx.destination);
+      o.start(now); o.stop(now + dur);
+    } catch (e) {}
+  }
+  function syncSound() {
+    $('sound').textContent = soundOn ? 'Geluid: aan' : 'Geluid: uit'; $('sound').setAttribute('aria-pressed', String(soundOn));
+    $('music').textContent = musicOn ? 'Muziek: aan' : 'Muziek: uit'; $('music').setAttribute('aria-pressed', String(musicOn));
+  }
+  $('sound').addEventListener('click', () => { soundOn = !soundOn; store.set('nsh-sound', soundOn); ensureAudio(); syncSound(); $('cv').focus(); });
+  $('music').addEventListener('click', () => {
+    musicOn = !musicOn; store.set('nsh-music', musicOn); ensureAudio(); syncSound();
+    if (!musicOn) Music.stop(); else if (cur && (state === 'playing' || state === 'countdown')) Music.start(cur.music);
+    $('cv').focus();
+  });
+  syncSound();
+
+  // ---------- music: small generative tune per game, made with Web Audio ----------
+  const Music = (() => {
+    const SCALES = { major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10] };
+    const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+    let timer = null, nextT = 0, step = 0, cfg = null, master = null, rate = 1;
+    function note(m, t, dur, type, vol, cut) {
+      const o = actx.createOscillator(), g = actx.createGain(), f = actx.createBiquadFilter();
+      f.type = 'lowpass'; f.frequency.value = cut;
+      o.type = type; o.frequency.value = mtof(m);
+      g.gain.setValueAtTime(.0001, t);
+      g.gain.linearRampToValueAtTime(vol, t + .02);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+      o.connect(f).connect(g).connect(master);
+      o.start(t); o.stop(t + dur + .05);
+    }
+    function chord(deg) {
+      const sc = SCALES[cfg.scale];
+      const n = i => { const d = deg + i; return cfg.root + sc[d % 7] + 12 * Math.floor(d / 7); };
+      return [n(0), n(2), n(4)];
+    }
+    function tick() {
+      if (!actx || !master) return;
+      const spb = 60 / (cfg.bpm * rate) / 4;
+      if (nextT < actx.currentTime - 1) nextT = actx.currentTime;
+      for (let guard = 0; guard < 64 && nextT < actx.currentTime + .25; guard++) {
+        const bar = Math.floor(step / 16) % cfg.prog.length, st = step % 16, ch = chord(cfg.prog[bar]);
+        try {
+          if (st === 0) ch.forEach(m => note(m, nextT, spb * 15.5, cfg.pad, .016, 900));
+          if (st % 8 === 0) note(ch[0] - 12, nextT, spb * 6, 'triangle', .045, 500);
+          if (st % cfg.every === 0) {
+            const pat = cfg.pat, idx = pat[(st / cfg.every) % pat.length];
+            note(ch[idx % 3] + 12 * (1 + Math.floor(idx / 3)), nextT, spb * cfg.every * .9, cfg.lead, .02, cfg.cut);
+          }
+        } catch (e) {}
+        nextT += spb; step++;
+      }
+    }
+    return {
+      start(c) {
+        this.stop();
+        if (!musicOn || !actx || !c) return;
+        cfg = c; rate = 1;
+        master = actx.createGain(); master.gain.value = 1; master.connect(actx.destination);
+        nextT = actx.currentTime + .08; step = 0;
+        timer = setInterval(tick, 60); tick();
+      },
+      stop() {
+        if (timer) { clearInterval(timer); timer = null; }
+        if (master) {
+          const m = master; master = null;
+          try { m.gain.setTargetAtTime(0, actx.currentTime, .12); } catch (e) {}
+          setTimeout(() => { try { m.disconnect(); } catch (e) {} }, 700);
+        }
+      },
+      setLevel(n) { rate = Math.min(1.3, 1 + (n - 1) * .03); }
+    };
+  })();
+
+  // ---------- name filter ----------
+  const LEET = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '8': 'b', '9': 'g', '@': 'a', '$': 's', '!': 'i', '|': 'i', '\u20ac': 'e' };
+  const squash = w => w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[0-9@$!|\u20ac]/g, ch => LEET[ch] || ch).replace(/[^a-z]/g, '').replace(/(.)\1+/g, '$1');
+  const BAD_PARTS = ['kanker', 'kenker', 'tering', 'tyfus', 'tiefus', 'klootzak', 'hoer', 'slet', 'mongool', 'debiel', 'neuk',
+    'flikker', 'godver', 'stront', 'kontgat', 'sperma', 'pedo', 'fuck', 'fuk', 'shit', 'bitch', 'cunt', 'pussy', 'niger', 'niga',
+    'nikker', 'neger', 'faggot', 'whore', 'slut', 'bastard', 'asshole', 'retard', 'hitler', 'nazi', 'penis', 'vagina', 'porn', 'dildo'].map(squash);
+  const BAD_WORDS = ['kut', 'lul', 'pik', 'dick', 'cock', 'homo', 'fag', 'kak', 'anus', 'sex', 'seks', 'reet', 'gvd', 'tits', 'kont'].map(squash);
+  function isRude(name) {
+    const all = squash(name);
+    if (BAD_PARTS.some(b => all.includes(b))) return true;
+    const words = name.split(/[\s._\-]+/).map(squash).filter(Boolean);
+    return BAD_WORDS.includes(all) || words.some(w => BAD_WORDS.includes(w));
+  }
+
+  function buzz(pattern) { try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) {} }
+
+  // ---------- scores ----------
+  let db = null, shared = null, canWrite = true;
+  let local = store.get('nsh-scores', {});
+  if (!local || typeof local !== 'object') local = {};
+  function clean(s) {
+    if (!s || typeof s !== 'object') return null;
+    const score = Number(s.score);
+    if (!isFinite(score) || score < 0) return null;
+    const nm = String(s.name || 'Speler').slice(0, 16);
+    return { game: String(s.game || ''), name: isRude(nm) ? 'Speler' : nm, score: Math.floor(score), at: Number(s.at) || 0 };
+  }
+  function topFor(id, n = 10) {
+    const list = shared ? shared.filter(s => s.game === id) : (local[id] || []);
+    return list.slice().sort((a, b) => b.score - a.score || a.at - b.at).slice(0, n);
+  }
+  const bestOf = id => Number(store.get('nsh-best-' + id, 0)) || 0;
+  function addLocal(id, name, score) {
+    const list = Array.isArray(local[id]) ? local[id] : [];
+    const same = list.find(s => s.name.toLowerCase() === name.toLowerCase());
+    if (same) { if (score > same.score) { same.score = score; same.at = Date.now(); same.name = name; } }
+    else list.push({ game: id, name, score, at: Date.now() });
+    local[id] = list.sort((a, b) => b.score - a.score).slice(0, 20);
+    store.set('nsh-scores', local);
+  }
+  const slug = name => name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30) || 'speler';
+  async function saveScore(id, name, score) {
+    addLocal(id, name, score);
+    if (!db || !canWrite) return { where: 'local' };
+    const ref = db.doc('scores/' + id + '--' + slug(name));
+    try {
+      const snap = await ref.get();
+      const prev = snap.exists ? clean(snap.data()) : null;
+      if (prev && prev.score >= score) return { where: 'shared', kept: prev.score };
+      await ref.set({ game: id, name, score, at: Date.now() });
+      return { where: 'shared' };
+    } catch (e) {
+      if (e && (e.code === 'invalid_argument' || e.code === 'not_granted' || e.code === 'revoked')) canWrite = false;
+      return { where: 'local', error: true };
+    }
+  }
+  async function initDb() {
+    if (!window.claude || !window.claude.use) return;
+    try { db = await window.claude.use('db'); } catch (e) { db = null; }
+    if (!db) return;
+    try {
+      const user = await window.claude.use('user');
+      const c = user ? await user.can('data.write') : null;
+      if (c === false) canWrite = false;
+    } catch (e) {}
+    try {
+      db.collection('scores').onSnapshot(snap => {
+        shared = snap.docs.map(d => clean(d.data())).filter(Boolean);
+        renderBoard();
+      }, () => {});
+    } catch (e) {}
+  }
+
+  function renderList(el, id, n, highlight) {
+    el.textContent = '';
+    const rows = topFor(id, n);
+    if (!rows.length) {
+      const li = document.createElement('li'); const s = document.createElement('span');
+      s.className = 'empty'; s.textContent = 'Nog geen scores. Speel een potje en zet je naam erop.';
+      li.style.display = 'block'; li.style.padding = '0'; li.appendChild(s); el.appendChild(li); return;
+    }
+    rows.forEach((r, i) => {
+      const li = document.createElement('li');
+      if (highlight && r.name.toLowerCase() === highlight.toLowerCase()) li.className = 'me';
+      [['rank', i + 1], ['name', r.name], ['pts', r.score.toLocaleString('nl-NL')], ['when', fmtDate(r.at)]].forEach(([c, v]) => {
+        const s = document.createElement('span'); s.className = c; s.textContent = v; li.appendChild(s);
+      });
+      el.appendChild(li);
+    });
+  }
+  const sourceText = () => shared ? 'Top 10 van iedereen' : 'Top 10 op dit apparaat';
+  function renderBoard() {
+    const me = store.get('nsh-name', '');
+    GAMES.forEach(def => { const el = document.getElementById('mini-' + def.id); if (el) renderList(el, def.id, 3, me); });
+    if (cur) {
+      $('introSource').textContent = sourceText(); $('overSource').textContent = sourceText();
+      renderList($('introList'), boardId(), 10, me);
+      renderList($('overList'), boardId(), 10, lastName || me);
+    }
+  }
+
+  // ---------- logo ----------
+  let logoN = 0;
+  function logoSVG() {
+    const n = ++logoN;
+    return '<svg class="logo" viewBox="0 0 620 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+      '<defs>' +
+      '<mask id="moon' + n + '"><rect width="620" height="150" fill="#fff"/><circle cx="96" cy="62" r="47" fill="#000"/></mask>' +
+      '<radialGradient id="glow' + n + '"><stop offset="0" stop-color="#fff6c8" stop-opacity="1"/><stop offset=".25" stop-color="#f4d35e" stop-opacity=".7"/><stop offset="1" stop-color="#ff8c42" stop-opacity="0"/></radialGradient>' +
+      '<radialGradient id="halo' + n + '"><stop offset="0" stop-color="#efe8c8" stop-opacity=".25"/><stop offset="1" stop-color="#efe8c8" stop-opacity="0"/></radialGradient>' +
+      '<filter id="soft' + n + '" x="-10%" y="-40%" width="120%" height="180%"><feGaussianBlur stdDeviation="6"/></filter>' +
+      '</defs>' +
+      '<circle cx="72" cy="76" r="74" fill="url(#halo' + n + ')"/>' +
+      '<circle cx="72" cy="76" r="50" fill="#efe8c8" mask="url(#moon' + n + ')"/>' +
+      '<path d="M26 136 Q70 128 104 104 T150 52" fill="none" stroke="#f4d35e" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity=".8"/>' +
+      '<circle cx="152" cy="46" r="30" fill="url(#glow' + n + ')"/>' +
+      '<ellipse cx="146" cy="39" rx="7" ry="4" fill="#cfe3ff" opacity=".75" transform="rotate(-30 146 39)"/>' +
+      '<ellipse cx="158" cy="39" rx="7" ry="4" fill="#cfe3ff" opacity=".75" transform="rotate(30 158 39)"/>' +
+      '<circle cx="152" cy="46" r="5.5" fill="#fffbe6"/>' +
+      '<text x="188" y="98" font-family="Fraunces, Georgia, serif" font-style="italic" font-weight="600" font-size="64" fill="#f4d35e" opacity=".45" filter="url(#soft' + n + ')">Nachtspeelhal</text>' +
+      '<text x="188" y="98" font-family="Fraunces, Georgia, serif" font-style="italic" font-weight="600" font-size="64" fill="#f4d35e">Nachtspeelhal</text>' +
+      '<text x="192" y="130" font-family="\'Atkinson Hyperlegible\', system-ui, sans-serif" font-size="16" letter-spacing="4" fill="#8fa3a0">SPELLEN BIJ MAANLICHT</text>' +
+      '</svg>';
+  }
+  document.querySelectorAll('.logo-slot').forEach(el => { el.innerHTML = logoSVG(); el.style.display = 'block'; });
+
+  // ---------- welcome ----------
+  function showWelcome() {
+    $('home').hidden = true; $('play').hidden = true; $('welkom').hidden = false;
+    window.scrollTo(0, 0);
+  }
+  function showGames() {
+    $('welkom').hidden = true; $('play').hidden = true; $('home').hidden = false;
+    window.scrollTo(0, 0);
+  }
+  $('toGames').addEventListener('click', showGames);
+  $('toWelcome').addEventListener('click', showWelcome);
+  (function buildStrip() {
+    const strip = $('strip');
+    GAMES.forEach(def => {
+      const c = document.createElement('canvas'); c.width = 320; c.height = 180;
+      try { def.thumb(c.getContext('2d'), 320, 180); } catch (e) {}
+      c.title = def.name;
+      strip.appendChild(c);
+    });
+  })();
+  if (location.hash === '#spellen') showGames();
+
+  // ---------- home ----------
+  function renderHome() {
+    const grid = $('grid'); grid.textContent = '';
+    GAMES.forEach(def => {
+      const card = document.createElement('article');
+      card.className = 'card'; card.style.setProperty('--accent', def.color);
+      const c = document.createElement('canvas'); c.width = 640; c.height = 360;
+      try { const x = c.getContext('2d'); x.scale(2, 2); def.thumb(x, 320, 180); } catch (e) {}
+      const body = document.createElement('div'); body.className = 'body';
+      const h = document.createElement('h3'); h.className = 'display'; h.textContent = def.name;
+      const p = document.createElement('p'); p.textContent = def.blurb;
+      const b = document.createElement('span'); b.className = 'best';
+      const best = bestOf(def.id); b.textContent = best ? 'Jouw record: ' + best.toLocaleString('nl-NL') : 'Nog niet gespeeld';
+      const mh = document.createElement('div'); mh.className = 'mini-head';
+      const ml = document.createElement('span'); ml.className = 'eyebrow'; ml.textContent = 'Scorebord top 3';
+      mh.appendChild(ml);
+      const mini = document.createElement('ol'); mini.className = 'scores mini'; mini.id = 'mini-' + def.id;
+      const go = document.createElement('button'); go.type = 'button'; go.className = 'play-btn go'; go.textContent = 'Spelen';
+      body.append(h, p, b, mh, mini, go); card.append(c, body);
+      card.addEventListener('click', () => openGame(def));
+      grid.appendChild(card);
+    });
+    renderBoard();
+  }
+
+  // ---------- play ----------
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, dpr = 1, cur = null, inst = null, state = 'home', curScore = 0, lastName = '';
+  let curLevel = 1, bannerT = 0, bannerSub = '', cdT = 0, cdEnd = 0, goT = 0, modeId = null, drawErr = '';
+  const boardId = () => modeId || (cur && cur.id);
+  const modeLabel = () => { const m = cur && cur.modes && cur.modes.find(x => x.id === modeId); return m ? m.label : ''; };
+  function resetLevel() { curLevel = 1; bannerT = 0; bannerSub = ''; $('lvl').textContent = '1'; }
+  const input = { keys: new Set(), pressed: new Set(), pointer: { x: 0, y: 0, down: false, seen: false, moved: false, tap: false, type: '', sx: 0, sy: 0 } };
+  const P = input.pointer;
+
+  function resize() {
+    if (state === 'home') return;
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.max(1, Math.round(W * dpr)); cv.height = Math.max(1, Math.round(H * dpr));
+    if (inst && inst.resize) inst.resize();
+  }
+  function api() {
+    return {
+      ctx, reduce, sound, pointer: P,
+      get W() { return W; }, get H() { return H; },
+      key: (...ks) => ks.some(k => input.keys.has(k)),
+      hit: (...ks) => ks.some(k => input.pressed.has(k)),
+      score(n) { const v = Math.max(0, Math.floor(n)); if (v !== curScore) { curScore = v; $('score').textContent = v.toLocaleString('nl-NL'); } },
+      info(t) { if ($('info').textContent !== t) $('info').textContent = t; },
+      mode: modeId,
+      vibrate: buzz,
+      meter(v, label) {
+        $('meterWrap').hidden = v == null;
+        if (label && $('meterLabel').textContent !== label) $('meterLabel').textContent = label;
+        if (v != null) { $('bar').style.width = (Math.max(0, Math.min(1, v)) * 100).toFixed(1) + '%'; $('meter').classList.toggle('low', v < .25); }
+      },
+      level(n, sub) {
+        if (n <= curLevel) return;
+        curLevel = n; bannerT = 2; bannerSub = sub || '';
+        $('lvl').textContent = n;
+        Music.setLevel(n);
+        sound(520, .12, 'triangle', .07, 200); setTimeout(() => sound(780, .18, 'triangle', .07, 300), 120);
+      },
+      end() { finish(); },
+      rand: (a, b) => a + Math.random() * (b - a)
+    };
+  }
+  function overlay(name) {
+    $('ovIntro').hidden = name !== 'intro';
+    $('ovPause').hidden = name !== 'pause';
+    $('ovOver').hidden = name !== 'over';
+  }
+  function buildPad(def) {
+    const pad = $('pad'); pad.textContent = '';
+    pad.hidden = !(coarse && def.touch);
+    if (!def.touch) return;
+    ['l', 'r'].forEach(side => {
+      const g = document.createElement('div'); g.className = 'grp';
+      def.touch.filter(b => b.side === side).forEach(b => {
+        const btn = document.createElement('button');
+        btn.type = 'button'; btn.textContent = b.label; btn.setAttribute('aria-label', b.aria || b.label);
+        const down = e => { e.preventDefault(); if (!input.keys.has(b.key)) input.pressed.add(b.key); input.keys.add(b.key); btn.classList.add('on'); };
+        const up = () => { input.keys.delete(b.key); btn.classList.remove('on'); };
+        btn.addEventListener('pointerdown', down);
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => btn.addEventListener(ev, up));
+        g.appendChild(btn);
+      });
+      pad.appendChild(g);
+    });
+  }
+  function renderModes() {
+    const box = $('modes'); box.textContent = '';
+    box.hidden = !cur.modes;
+    $('introBoardTitle').textContent = 'Scorebord ' + cur.name + (modeLabel() ? ' \u00b7 ' + modeLabel() : '');
+    $('best').textContent = bestOf(boardId()).toLocaleString('nl-NL');
+    if (!cur.modes) return;
+    cur.modes.forEach(m => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.textContent = m.label; b.setAttribute('aria-pressed', String(m.id === modeId));
+      b.addEventListener('click', () => {
+        modeId = m.id; store.set('nsh-mode-' + cur.id, modeId);
+        renderModes(); renderBoard();
+        inst = cur.create(api());
+      });
+      box.appendChild(b);
+    });
+  }
+  function openGame(def) {
+    cur = def; inst = null;
+    modeId = def.modes ? (store.get('nsh-mode-' + def.id, def.modes[0].id)) : null;
+    if (def.modes && !def.modes.some(m => m.id === modeId)) modeId = def.modes[0].id;
+    document.documentElement.style.setProperty('--accent', def.color);
+    $('home').hidden = true; $('play').hidden = false;
+    state = 'intro';
+    $('gameTitle').textContent = def.name;
+    $('introTitle').textContent = def.name;
+    $('introBlurb').textContent = def.blurb;
+    const how = $('introHow'); how.textContent = '';
+    def.how.forEach(t => { const li = document.createElement('li'); li.textContent = t; how.appendChild(li); });
+    renderModes();
+    curScore = -1; api().score(0); $('info').textContent = ''; $('meterWrap').hidden = true; $('meterLabel').textContent = '';
+    buildPad(def);
+    resetLevel();
+    renderBoard();
+    overlay('intro');
+    window.scrollTo(0, 0);
+    resize();
+    inst = def.create(api());
+    $('startBtn').focus();
+  }
+  function start() {
+    if (!cur) return;
+    ensureAudio();
+    input.keys.clear(); input.pressed.clear();
+    curScore = -1; api().score(0);
+    resetLevel(); drawErr = '';
+    inst = null; inst = cur.create(api());
+    overlay(null);
+    beginCountdown();
+    Music.start(cur.music);
+    cv.focus();
+  }
+  function beginCountdown() { state = 'countdown'; cdEnd = performance.now() + 3000; cdT = 3; goT = 0; sound(440, .12, 'triangle', .07); }
+  function finish() {
+    if (state !== 'playing') return;
+    state = 'over';
+    Music.stop();
+    buzz([120, 60, 220]);
+    const s = curScore, prevBest = bestOf(boardId()), record = s > prevBest;
+    if (record) { store.set('nsh-best-' + boardId(), s); $('best').textContent = s.toLocaleString('nl-NL'); }
+    $('overTitle').textContent = record && s > 0 ? 'Nieuw record!' : 'Game over';
+    $('final').textContent = s.toLocaleString('nl-NL');
+    lastName = store.get('nsh-name', '');
+    $('playerName').value = lastName;
+    $('saveBtn').disabled = s <= 0;
+    $('saveMsg').textContent = s <= 0 ? 'Haal minstens 1 punt om op het scorebord te komen.' : '';
+    renderBoard();
+    overlay('over');
+    sound(300, .5, 'triangle', .07, -200);
+    setTimeout(() => (lastName ? $('saveBtn') : $('playerName')).focus(), 60);
+  }
+  function togglePause() {
+    if (state === 'playing' || state === 'countdown') { state = 'paused'; overlay('pause'); input.keys.clear(); Music.stop(); $('resumeBtn').focus(); }
+    else if (state === 'paused') { overlay(null); beginCountdown(); Music.start(cur.music); cv.focus(); }
+  }
+  function leave() {
+    Music.stop();
+    if (fsActive()) exitFs();
+    state = 'home'; inst = null; cur = null; modeId = null;
+    input.keys.clear();
+    $('play').hidden = true; $('home').hidden = false;
+    renderHome();
+  }
+
+  $('saveForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = $('playerName').value.trim().replace(/\s+/g, ' ').slice(0, 16);
+    if (!name) { $('saveMsg').textContent = 'Vul eerst je naam in.'; $('playerName').focus(); return; }
+    if (isRude(name)) { $('saveMsg').textContent = 'Deze naam mag niet. Kies een andere naam.'; $('playerName').focus(); return; }
+    store.set('nsh-name', name); lastName = name;
+    $('saveBtn').disabled = true; $('saveMsg').textContent = 'Opslaan…';
+    const res = await saveScore(boardId(), name, curScore);
+    if (res.where === 'shared') $('saveMsg').textContent = res.kept != null ? `Opgeslagen. Je beste score blijft ${res.kept.toLocaleString('nl-NL')}.` : 'Je staat op het scorebord.';
+    else $('saveMsg').textContent = db ? 'Opgeslagen op dit apparaat. Het gedeelde scorebord kun je met deze link niet aanpassen.' : 'Opgeslagen op dit apparaat.';
+    renderBoard();
+    $('againBtn').focus();
+  });
+  $('startBtn').addEventListener('click', start);
+  $('againBtn').addEventListener('click', start);
+  $('otherBtn').addEventListener('click', leave);
+  $('back').addEventListener('click', leave);
+  $('quitBtn').addEventListener('click', leave);
+  $('resumeBtn').addEventListener('click', togglePause);
+  $('pause').addEventListener('click', () => { if (state === 'playing' || state === 'paused' || state === 'countdown') togglePause(); });
+
+  // ---------- fullscreen ----------
+  const playEl = $('play');
+  const fsActive = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  function exitFs() { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) {} }
+  if (document.fullscreenEnabled || document.webkitFullscreenEnabled) $('fsBtn').hidden = false;
+  $('fsBtn').addEventListener('click', async () => {
+    if (fsActive()) { exitFs(); return; }
+    try {
+      const req = playEl.requestFullscreen || playEl.webkitRequestFullscreen;
+      await req.call(playEl);
+    } catch (e) { $('fsBtn').hidden = true; }
+    cv.focus();
+  });
+  function onFs() {
+    const on = fsActive();
+    playEl.classList.toggle('fs', on);
+    $('fsBtn').textContent = on ? 'Klein scherm' : 'Volledig scherm';
+    setTimeout(resize, 60);
+  }
+  document.addEventListener('fullscreenchange', onFs);
+  document.addEventListener('webkitfullscreenchange', onFs);
+
+  const norm = e => e.key === ' ' ? ' ' : e.key.toLowerCase();
+  addEventListener('keydown', e => {
+    if (state === 'home') return;
+    const tag = e.target && e.target.tagName;
+    if (tag === 'INPUT') return;
+    const k = norm(e);
+    if (k === 'escape' || k === 'p') { if (state === 'playing' || state === 'paused' || state === 'countdown') { e.preventDefault(); togglePause(); } return; }
+    if (tag === 'BUTTON' && state !== 'playing' && state !== 'countdown') return;
+    if (state === 'intro' && (k === 'enter' || k === ' ')) { e.preventDefault(); start(); return; }
+    if (state === 'playing' || state === 'countdown') {
+      if (!input.keys.has(k) && state === 'playing') input.pressed.add(k);
+      input.keys.add(k);
+      if (k.startsWith('arrow') || k === ' ') e.preventDefault();
+    }
+  });
+  addEventListener('keyup', e => input.keys.delete(norm(e)));
+  addEventListener('blur', () => input.keys.clear());
+  document.addEventListener('visibilitychange', () => { if (document.hidden && (state === 'playing' || state === 'countdown')) togglePause(); });
+
+  const pos = e => { const r = cv.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  cv.addEventListener('pointerdown', e => {
+    const p = pos(e);
+    Object.assign(P, { x: p.x, y: p.y, sx: p.x, sy: p.y, down: true, tap: true, seen: true, moved: true, type: e.pointerType });
+    input.pressed.add('tap');
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  cv.addEventListener('pointermove', e => {
+    const p = pos(e);
+    Object.assign(P, { x: p.x, y: p.y, seen: true, moved: true, type: e.pointerType });
+    if (P.down) {
+      const dx = p.x - P.sx, dy = p.y - P.sy;
+      if (Math.max(Math.abs(dx), Math.abs(dy)) > 26) {
+        input.pressed.add(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'swiperight' : 'swipeleft') : (dy > 0 ? 'swipedown' : 'swipeup'));
+        P.sx = p.x; P.sy = p.y;
+      }
+    }
+  });
+  ['pointerup', 'pointercancel'].forEach(ev => cv.addEventListener(ev, () => { P.down = false; }));
+  addEventListener('resize', resize);
+
+  function drawBanner() {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, bannerT / .5);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,.7)'; ctx.shadowBlur = 14;
+    const size = Math.max(30, Math.min(64, W * .12));
+    ctx.font = 'italic 600 ' + size + 'px Fraunces, Georgia, serif';
+    ctx.fillStyle = cur.color;
+    ctx.fillText('Level ' + curLevel + '!', W / 2, H * .36);
+    if (bannerSub) {
+      ctx.font = '700 17px "Atkinson Hyperlegible", system-ui, sans-serif';
+      ctx.fillStyle = '#e8efe4';
+      ctx.fillText(bannerSub, W / 2, H * .36 + size * .8);
+    }
+    ctx.restore();
+  }
+
+  function drawBig(text, alpha, scale) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(0,0,0,.75)'; ctx.shadowBlur = 22;
+    ctx.font = 'italic 600 ' + Math.round(Math.min(170, Math.max(70, W * .28)) * scale) + 'px Fraunces, Georgia, serif';
+    ctx.fillStyle = cur.color;
+    ctx.fillText(text, W / 2, H / 2);
+    ctx.restore();
+  }
+
+  let last = 0;
+  function frame(now) {
+    let elapsed = last ? Math.max(0, (now - last) / 1000) : 0; last = now;
+    if (state === 'playing' || state === 'countdown') {
+      if (elapsed > .25) slowFrames++; else if (slowFrames > 0 && !useMC) slowFrames--;
+      if (slowFrames >= 3 && !useMC) useMC = true;
+    }
+    elapsed = Math.min(elapsed, .25);
+    if (inst && state !== 'home') {
+      if (state === 'countdown') {
+        if (P.tap) cdEnd = now;
+        const before = Math.ceil(cdT);
+        cdT = Math.max(0, (cdEnd - now) / 1000);
+        if (cdT <= 0) { state = 'playing'; goT = .7; sound(880, .25, 'triangle', .08); }
+        else if (Math.ceil(cdT) !== before) sound(440, .12, 'triangle', .07);
+      }
+      try {
+        let left = elapsed;
+        if (state === 'playing') {
+          do { const dt = Math.min(.05, left); inst.update(dt); left -= dt; } while (left > 1e-6 && state === 'playing');
+          bannerT = Math.max(0, bannerT - elapsed);
+          if (goT > 0) goT = Math.max(0, goT - elapsed);
+        } else if (state === 'intro' && inst.idle) inst.idle(Math.min(.05, elapsed));
+      } catch (err) { drawErr = String(err && err.message || err); console.error(err); }
+      try {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        inst.draw();
+      } catch (err) { drawErr = String(err && err.message || err); console.error(err); }
+      try {
+        if (bannerT > 0 && state !== 'intro') drawBanner();
+        if (state === 'countdown') {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.fillStyle = 'rgba(7,11,23,.35)'; ctx.fillRect(0, 0, W, H);
+          const frac = cdT - Math.floor(cdT);
+          drawBig(String(Math.max(1, Math.ceil(cdT))), .3 + frac, .75 + frac * .35);
+        } else if (goT > 0) drawBig('Go!', goT / .7 * 1.4, 1);
+        if (drawErr) {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          ctx.fillStyle = 'rgba(229,72,77,.9)'; ctx.fillRect(0, H - 28, W, 28);
+          ctx.fillStyle = '#fff'; ctx.font = '13px "Atkinson Hyperlegible", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+          ctx.fillText('Er ging iets mis: ' + drawErr.slice(0, 90), 10, H - 14);
+        }
+      } catch (err) { console.error(err); }
+    }
+    input.pressed.clear(); P.tap = false; P.moved = false;
+    schedule();
+  }
+  // next frame: normally via requestAnimationFrame; a timer takes over in views where that never fires
+  // when the view throttles timers and frames, a MessageChannel keeps the loop going
+  let loopId = 0, slowFrames = 0, useMC = false;
+  const mc = new MessageChannel();
+  let mcStep = null;
+  mc.port1.onmessage = () => { const f = mcStep; mcStep = null; if (f) f(); };
+  function mcLater(fn, ms) {
+    const due = performance.now() + ms;
+    const step = () => { if (performance.now() >= due) fn(); else { mcStep = step; mc.port2.postMessage(0); } };
+    mcStep = step; mc.port2.postMessage(0);
+  }
+  function schedule() {
+    let done = false;
+    const id = ++loopId;
+    const run = () => { if (done || id !== loopId) return; done = true; frame(performance.now()); };
+    try { requestAnimationFrame(run); } catch (e) {}
+    setTimeout(run, 40);
+    if (useMC && (state === 'playing' || state === 'countdown')) mcLater(run, 16);
+  }
+
+  renderHome();
+  schedule();
+  setInterval(() => { if (last && performance.now() - last > 400) frame(performance.now()); }, 250);
+  initDb();
+})();
+</script>
+</body>
+</html>
