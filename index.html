@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Nachtspeelhal</title>
-<meta name="description" content="Elf gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
+<meta name="description" content="Twaalf gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
 <meta name="theme-color" content="#070b17">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Nachtspeelhal">
-<meta property="og:description" content="Elf gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
+<meta property="og:description" content="Twaalf gratis arcadespellen bij maanlicht, elk met een eigen scorebord.">
 <meta property="og:url" content="https://dokmannl.github.io/nachtspeelhal/">
 <meta property="og:image" content="https://dokmannl.github.io/nachtspeelhal/deel.jpg">
 <meta property="og:image:width" content="1200">
@@ -72,7 +72,7 @@ button:focus-visible, input:focus-visible, .card:focus-visible { outline: 2px so
 .w-hero { display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; }
 .w-hero .logo { width: min(100%, 600px); margin: 0 auto; }
 .w-hero p { margin: 0; color: var(--muted); max-width: 50ch; line-height: 1.6; font-size: 1.1rem; }
-.strip { display: grid; grid-template-columns: repeat(11, minmax(0, 1fr)); gap: 8px; width: 100%; }
+.strip { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; width: 100%; }
 .strip canvas { width: 100%; aspect-ratio: 16 / 9; border-radius: 8px; border: 1px solid var(--line); display: block; }
 @media (max-width: 640px) { .strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .sale { border: 1px solid var(--glow); border-radius: 16px; padding: 22px 24px; background: rgba(244, 211, 94, .05); display: flex; flex-direction: column; gap: 12px; }
@@ -210,14 +210,14 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
 <main id="welkom">
   <section class="w-hero">
     <h1 style="margin:0;width:100%"><span class="logo-slot" data-size="big" role="img" aria-label="Nachtspeelhal"></span></h1>
-    <p>Elf arcadespellen bij maanlicht. Gratis, zonder reclame, met een eigen scorebord per spel. Speel met toetsenbord, muis of je vinger.</p>
+    <p>Twaalf arcadespellen bij maanlicht. Gratis, zonder reclame, met een eigen scorebord per spel. Speel met toetsenbord, muis of je vinger.</p>
     <button class="play-btn" id="toGames" type="button">Naar de spellen</button>
     <div class="strip" id="strip" aria-hidden="true"></div>
   </section>
 
   <section class="sale" aria-labelledby="saleTitle">
     <h2 class="display" id="saleTitle">Deze site is te koop</h2>
-    <p>Elf eigen spellen, scoreborden en statistieken, klaar om over te nemen. Bekijk precies wat je krijgt en doe een bod.</p>
+    <p>Twaalf eigen spellen, scoreborden en statistieken, klaar om over te nemen. Bekijk precies wat je krijgt en doe een bod.</p>
     <div><a class="play-btn" href="te-koop.html" style="display:inline-block;text-decoration:none">Bekijk wat je krijgt &rarr;</a></div>
   </section>
 
@@ -243,7 +243,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
       <h1 style="margin:0" class="logo-small"><span class="logo-slot" data-size="small" role="img" aria-label="Nachtspeelhal"></span></h1>
       <button class="btn" id="toWelcome" type="button">Over deze site</button>
     </div>
-    <span class="eyebrow">Elf spellen · elk met een eigen scorebord</span>
+    <span class="eyebrow">Twaalf spellen · elk met een eigen scorebord</span>
     <p>Kies een spel, haal een zo hoog mogelijke score en zet je naam op het scorebord. Werkt met toetsenbord, muis of je vinger.</p>
   </section>
 
@@ -348,6 +348,7 @@ window.rrect = function (c, x, y, w, h, r) {
 <script src="games/lantaarnman.js"></script>
 <script src="games/uilenvlucht.js"></script>
 <script src="games/spokenjacht.js"></script>
+<script src="games/maansprong.js"></script>
 <script>
 (() => {
   const $ = id => document.getElementById(id);
