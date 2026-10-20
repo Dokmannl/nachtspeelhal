@@ -185,7 +185,7 @@ th { color: var(--muted); font-weight: 400; font-size: .78rem; text-transform: u
     } catch (e) { return null; }
   }
   const ACH = { eerste: 'Eerste potje', vijf: 'Ontdekker (5 spellen)', alle: 'Alleskunner (alle 12)', scorebord: 'Op het scorebord', record: 'Beter dan ooit', gedeeld: 'Opschepper (gedeeld)',
-    dag1: 'Dagtaak', dag3: 'Volhouder (3 dagen)', dag7: 'Week vol (7 dagen)', nacht: 'Nachtbraker', marathon: 'Marathon (10 min)', honderd: 'Vaste gast (100 rondes)' };
+    dag1: 'Dagtaak', dag3: 'Volhouder (3 dagen)', dag7: 'Week vol (7 dagen)', nacht: 'Nachtbraker', marathon: 'Marathon (10 min)', honderd: 'Vaste gast (100 rondes)', uitdager: 'Uitdaging gewonnen' };
   const achName = k => ACH[k] || (k.startsWith('lvl-') ? (NAMES[k.slice(4)] || k.slice(4)) + ': level 5' : k);
 
   function tile(label, value, sub, dir, box) {

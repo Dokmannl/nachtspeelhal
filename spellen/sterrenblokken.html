@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sterrenblokken – gratis online spelen | Nachtspeelhal</title>
+<meta name="description" content="Speel Sterrenblokken gratis online. Stapel vallende sterrenblokken. Maak een rij helemaal vol en hij verdwijnt in een flits. Zonder reclame, met scorebord.">
+<link rel="canonical" href="https://dokmannl.github.io/nachtspeelhal/spellen/sterrenblokken.html">
+<meta name="theme-color" content="#070b17">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Sterrenblokken – Nachtspeelhal">
+<meta property="og:description" content="Speel Sterrenblokken gratis online. Stapel vallende sterrenblokken. Maak een rij helemaal vol en hij verdwijnt in een flits. Zonder reclame, met scorebord.">
+<meta property="og:url" content="https://dokmannl.github.io/nachtspeelhal/spellen/sterrenblokken.html">
+<meta property="og:image" content="https://dokmannl.github.io/nachtspeelhal/deel.jpg">
+<meta property="og:locale" content="nl_NL">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--night:#070b17;--panel:#0f1824;--line:#1f2e3a;--ink:#e8efe4;--muted:#8fa3a0;--glow:#f4d35e;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--night);color:var(--ink);font:16px/1.6 "Atkinson Hyperlegible",system-ui,sans-serif;padding:0 max(16px,env(safe-area-inset-left,0px))}
+main{max-width:860px;margin:0 auto;padding:24px 0 48px;display:flex;flex-direction:column;gap:22px}
+a{color:var(--glow)}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{font:italic 600 1.6rem Fraunces,Georgia,serif;color:var(--glow);text-decoration:none}
+h1{margin:0;font:italic 600 clamp(2.2rem,7vw,3.4rem)/1.1 Fraunces,Georgia,serif;color:var(--accent)}
+h2{margin:0;font:italic 600 1.5rem Fraunces,Georgia,serif}
+p{margin:0;max-width:65ch}.muted{color:var(--muted)}
+canvas{display:block;width:100%;aspect-ratio:16/9;border-radius:14px;border:1px solid var(--accent)}
+.play{display:inline-block;align-self:flex-start;background:var(--glow);color:var(--night);font-weight:700;font-size:1.1rem;padding:12px 28px;border-radius:99px;text-decoration:none;box-shadow:0 0 26px rgba(244,211,94,.45)}
+ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+ol.scores{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.scores li{display:grid;grid-template-columns:2.4em 1fr auto;gap:12px;padding:9px 16px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.scores li:first-child{border-top:0}.scores .r{color:var(--muted)}.scores b{font-weight:700}
+.more{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,180px),1fr));gap:10px}
+.more a{display:block;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);text-decoration:none;font:italic 600 1.1rem Fraunces,Georgia,serif}
+footer{color:var(--muted);font-size:.85rem;border-top:1px solid var(--line);padding-top:16px}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "VideoGame", "name": "Sterrenblokken", "url": "https://dokmannl.github.io/nachtspeelhal/spellen/sterrenblokken.html", "description": "Stapel vallende sterrenblokken. Maak een rij helemaal vol en hij verdwijnt in een flits.", "inLanguage": "nl", "gamePlatform": "Webbrowser", "applicationCategory": "Game", "operatingSystem": "Alle", "playMode": "SinglePlayer", "image": "https://dokmannl.github.io/nachtspeelhal/deel.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "isPartOf": {"@type": "WebSite", "name": "Nachtspeelhal", "url": "https://dokmannl.github.io/nachtspeelhal/"}}</script>
+</head>
+<body style="--accent:#9ec5ff">
+<main>
+  <div class="top"><a class="brand" href="../">Nachtspeelhal</a><a href="../#spellen">Alle 12 spellen</a></div>
+  <h1>Sterrenblokken</h1>
+  <canvas id="thumb" width="640" height="360" role="img" aria-label="Sterrenblokken, voorbeeld van het spel"></canvas>
+  <p>Stapel vallende sterrenblokken. Maak een rij helemaal vol en hij verdwijnt in een flits.</p>
+  <p class="muted">Sterrenblokken is een gratis online spel op Nachtspeelhal. Je speelt het meteen in je browser, op je telefoon of computer, zonder downloaden, zonder account en zonder reclame.</p>
+  <a class="play" href="../#sterrenblokken">Speel Sterrenblokken nu</a>
+  <section>
+    <h2>Zo speel je Sterrenblokken</h2>
+    <ul>
+      <li>Pijltjes links en rechts: schuiven. Pijltje omhoog of X: draaien</li>
+      <li>Pijltje omlaag: sneller vallen. Spatie: meteen laten vallen</li>
+      <li>Telefoon: veeg links of rechts, tik om te draaien, veeg omlaag om te laten vallen</li>
+      <li>Elke 10 rijen een level: sneller, vanaf level 6 rommelrijen van onderen, vanaf level 8 geen schaduw meer</li>
+    </ul>
+  </section>
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <h2>Scorebord top 10</h2>
+    <ol class="scores" id="top"><li style="display:block">Scorebord laden…</li></ol>
+    <p class="muted">Per naam telt alleen je beste score. Elke dag is er ook een dagelijkse uitdaging met een eigen dagklassement.</p>
+  </section>
+  <section style="display:flex;flex-direction:column;gap:10px">
+    <h2>Meer gratis spellen</h2>
+    <nav class="more">
+      <a href="vuurvlieg.html" style="color:#f4d35e">Vuurvlieg</a>
+      <a href="stuiterbal.html" style="color:#7cc6fe">Stuiterbal</a>
+      <a href="racebaan.html" style="color:#ff8c42">Racebaan</a>
+      <a href="sprongheld.html" style="color:#9ef0c8">Sprongheld</a>
+      <a href="slang.html" style="color:#b392f0">Slang</a>
+      <a href="toren.html" style="color:#f78fb3">Torenbouwer</a>
+      <a href="kikkersprong.html" style="color:#7ee08a">Kikkersprong</a>
+      <a href="lantaarnman.html" style="color:#ffb347">Lantaarnman</a>
+      <a href="uilenvlucht.html" style="color:#d9a86c">Uilenvlucht</a>
+      <a href="spokenjacht.html" style="color:#8c9bff">Spokenjacht</a>
+      <a href="maansprong.html" style="color:#c9b8ff">Maansprong</a>
+    </nav>
+  </section>
+  <footer>Nachtspeelhal · twaalf gratis arcadespellen bij maanlicht · <a href="../te-koop.html">Deze site is te koop</a></footer>
+</main>
+<script>window.GAMES = []; window.rrect = function (c, x, y, w, h, r) { r = Math.max(0, Math.min(r, w / 2, h / 2)); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); };</script>
+<script src="../games/sterrenblokken.js"></script>
+<script>
+(() => {
+  const SUPA = { url: 'https://mcakdvonmliccvqtzsuw.supabase.co', key: 'sb_publishable_N10Mu-RjANOLzRHon0ZwrQ_WX-zdJGY' }, ID = 'sterrenblokken';
+  try { const c = document.getElementById('thumb'), x = c.getContext('2d'); x.scale(2, 2); GAMES[0].thumb(x, 320, 180); } catch (e) {}
+  const list = document.getElementById('top');
+  const local = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  fetch(SUPA.url + '/rest/v1/top_scores?select=name,score&order=score.desc&limit=10&game=eq.' + ID, { headers: { apikey: SUPA.key } })
+    .then(r => r.ok ? r.json() : []).then(rows => {
+      list.textContent = '';
+      if (!rows.length) { const li = document.createElement('li'); li.textContent = 'Nog geen scores. Word jij de eerste?'; li.style.display = 'block'; list.appendChild(li); return; }
+      rows.forEach((r, i) => {
+        const li = document.createElement('li');
+        [['r', i + 1], ['', r.name], ['b', Number(r.score).toLocaleString('nl-NL')]].forEach(([cl, v]) => { const s = document.createElement(cl === 'b' ? 'b' : 'span'); if (cl === 'r') s.className = 'r'; s.textContent = v; li.appendChild(s); });
+        list.appendChild(li);
+      });
+    }).catch(() => { list.textContent = ''; });
+  if (local) return;
+  const get = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+  const set = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+  const ref = (document.referrer || '').toLowerCase();
+  const source = ref.includes('google.') ? 'google' : ref.includes('whatsapp') ? 'whatsapp' : (ref.includes('facebook.') || ref.includes('fb.')) ? 'facebook' : (!ref || ref.includes(location.hostname)) ? 'direct' : 'anders';
+  const visitor = get('nsh-seen') ? 'terug' : 'nieuw'; set('nsh-seen', true);
+  const now = new Date(), pad = n => String(n).padStart(2, '0');
+  const dayKey = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()), monthKey = dayKey.slice(0, 7);
+  const th = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 3 - (now.getDay() + 6) % 7);
+  const weekKey = th.getFullYear() + '-w' + (1 + Math.round(((th - new Date(th.getFullYear(), 0, 4)) / 864e5 - 3 + (new Date(th.getFullYear(), 0, 4).getDay() + 6) % 7) / 7));
+  const isNew = (k, v) => { if (get(k) === v) return false; set(k, v); return true; };
+  fetch(SUPA.url + '/rest/v1/rpc/count_visit', { method: 'POST', headers: { apikey: SUPA.key, 'Content-Type': 'application/json' }, body: JSON.stringify({
+    p_page: ID, p_device: matchMedia('(pointer: coarse)').matches ? 'telefoon' : 'computer', p_source: source, p_visitor: visitor,
+    p_lang: (navigator.language || '').slice(0, 2).toLowerCase(), p_dow: (now.getDay() + 6) % 7, p_hour: now.getHours(),
+    p_new_day: isNew('nsh-dag', dayKey), p_new_week: isNew('nsh-week', weekKey), p_new_month: isNew('nsh-maand', monthKey) }) }).catch(() => {});
+})();
+</script>
+</body>
+</html>

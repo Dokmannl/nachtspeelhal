@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /nachtspeelhal/stats.html
+Disallow: /stats.html
+Sitemap: https://dokmannl.github.io/nachtspeelhal/sitemap.xml

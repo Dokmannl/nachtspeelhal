@@ -15,6 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="nl_NL">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://dokmannl.github.io/nachtspeelhal/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -115,6 +116,10 @@ button:focus-visible, input:focus-visible, .card:focus-visible { outline: 2px so
 #toast b { display: block; }
 .d-tag { display: inline-block; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--night); background: var(--accent, var(--glow)); border-radius: 99px; padding: 3px 10px; font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { #toast { transition: none; } }
+/* ---------- challenge a friend ---------- */
+.ch-note { margin: 0; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--accent, var(--glow)); background: rgba(244, 211, 94, .08); color: var(--ink); font-weight: 700; line-height: 1.4; text-wrap: balance; }
+.game-links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; }
+.game-links a { color: var(--muted); }
 .contact { display: flex; flex-direction: column; gap: 10px; }
 .cf-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
 .contact label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; color: var(--muted); min-width: 0; }
@@ -296,7 +301,9 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <div class="ach-grid" id="achGrid"></div>
   </section>
 
-  <footer id="foot">Elk spel heeft een eigen scorebord met de top 10, te zien als je het spel opent. Per naam telt alleen je beste score.</footer>
+  <footer id="foot">Elk spel heeft een eigen scorebord met de top 10, te zien als je het spel opent. Per naam telt alleen je beste score.
+    <nav class="game-links" id="gameLinks" aria-label="Over de spellen"></nav>
+  </footer>
 </main>
 
 <div id="play" hidden>
@@ -324,6 +331,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
           <p id="introBlurb"></p>
           <ul class="how" id="introHow"></ul>
           <div class="row modes" id="modes" role="group" aria-label="Spelvorm" hidden></div>
+          <p class="ch-note" id="chIntro" hidden></p>
           <button class="play-btn" id="startBtn" type="button">Start</button>
         </div>
         <div class="intro-board">
@@ -345,6 +353,7 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
     <div class="overlay" id="ovOver" hidden>
       <h3 class="display" id="overTitle">Game over</h3>
       <div class="big" id="final">0</div>
+      <p class="ch-note" id="chResult" hidden></p>
       <form class="save" id="saveForm">
         <label for="playerName" class="eyebrow" style="align-self:center">Je naam</label>
         <input id="playerName" maxlength="16" autocomplete="nickname" placeholder="Bijv. Dokman">
@@ -352,9 +361,9 @@ footer { color: var(--muted); font-size: .85rem; line-height: 1.5; max-width: 70
       </form>
       <div id="saveMsg" role="status"></div>
       <div class="row" id="shareRow" hidden>
-        <button class="ghost-btn" id="shareBtn" type="button" hidden>Deel je score</button>
-        <a class="ghost-btn" id="waBtn" href="https://wa.me/" target="_blank" rel="noopener" hidden>Deel via WhatsApp</a>
-        <button class="ghost-btn" id="copyBtn" type="button" hidden>Kopieer link</button>
+        <button class="ghost-btn" id="shareBtn" type="button" hidden>Daag een vriend uit</button>
+        <a class="ghost-btn" id="waBtn" href="https://wa.me/" target="_blank" rel="noopener" hidden>Daag uit via WhatsApp</a>
+        <button class="ghost-btn" id="copyBtn" type="button" hidden>Kopieer uitdaging</button>
       </div>
       <div id="shareMsg" role="status"></div>
       <span class="source" id="overSource"></span>
@@ -762,6 +771,7 @@ window.rrect = function (c, x, y, w, h, r) {
     { id: 'nacht', ic: '☾', name: 'Nachtbraker', how: 'Speel tussen middernacht en 5 uur.' },
     { id: 'marathon', ic: '⧗', name: 'Marathon', how: 'Speel 10 minuten in één ronde.' },
     { id: 'honderd', ic: 'Ⅰ', name: 'Vaste gast', how: 'Speel 100 rondes.' },
+    { id: 'uitdager', ic: '⚔', name: 'Uitdaging gewonnen', how: 'Versla de score van een vriend die je uitdaagde.' },
     { id: 'lvl-', ic: '5', name: 'Level 5', how: 'Haal level 5 in ' }
   ];
   function achList() {
@@ -859,6 +869,20 @@ window.rrect = function (c, x, y, w, h, r) {
   })();
   if (location.hash === '#spellen') showGames();
   const deepLink = location.hash.slice(1);
+  // challenge from a friend: ?versla=4200&van=Naam#spel
+  let challenge = null;
+  (function readChallenge() {
+    try {
+      const q = new URLSearchParams(location.search);
+      const sc = parseInt(q.get('versla'), 10);
+      if (!(sc > 0 && sc < 1e7) || !deepLink) return;
+      let from = (q.get('van') || '').trim().replace(/\s+/g, ' ').slice(0, 16);
+      if (isRude(from)) from = '';
+      challenge = { game: deepLink, score: sc, from, beaten: false, flash: 0 };
+    } catch (e) {}
+  })();
+  const chOn = () => !!(challenge && cur && !dailyOn && boardId() === challenge.game);
+  const chWho = () => challenge.from || 'Je vriend';
 
   // ---------- home ----------
   function renderHome() {
@@ -909,7 +933,14 @@ window.rrect = function (c, x, y, w, h, r) {
       get W() { return W; }, get H() { return H; },
       key: (...ks) => ks.some(k => input.keys.has(k)),
       hit: (...ks) => ks.some(k => input.pressed.has(k)),
-      score(n) { const v = Math.max(0, Math.floor(n)); if (v !== curScore) { curScore = v; $('score').textContent = v.toLocaleString('nl-NL'); } },
+      score(n) {
+        const v = Math.max(0, Math.floor(n));
+        if (v !== curScore) { curScore = v; $('score').textContent = v.toLocaleString('nl-NL'); }
+        if (state === 'playing' && chOn() && !challenge.beaten && v > challenge.score) {
+          challenge.beaten = true; challenge.flash = 2.2;
+          sound(660, .12, 'triangle', .08, 200); setTimeout(() => sound(990, .25, 'triangle', .08, 300), 130); buzz(80);
+        }
+      },
       info(t) { if ($('info').textContent !== t) $('info').textContent = t; },
       mode: modeId,
       vibrate: buzz,
@@ -958,6 +989,8 @@ window.rrect = function (c, x, y, w, h, r) {
     box.hidden = !cur.modes || dailyOn;
     $('introBoardTitle').textContent = dailyOn ? 'Dagklassement' : 'Scorebord ' + cur.name + (modeLabel() ? ' \u00b7 ' + modeLabel() : '');
     $('best').textContent = bestOf(boardId()).toLocaleString('nl-NL');
+    $('chIntro').hidden = !chOn();
+    if (chOn()) $('chIntro').textContent = chWho() + ' daagt je uit: versla ' + challenge.score.toLocaleString('nl-NL') + ' punten!';
     if (!cur.modes || dailyOn) return;
     cur.modes.forEach(m => {
       const b = document.createElement('button');
@@ -1002,6 +1035,7 @@ window.rrect = function (c, x, y, w, h, r) {
     curScore = -1; api().score(0);
     sendRound(false);
     resetLevel(); drawErr = ''; playSec = 0; roundOpen = true;
+    if (challenge) { challenge.beaten = false; challenge.flash = 0; }
     seedRandom();
     inst = null; inst = cur.create(api());
     overlay(null);
@@ -1025,6 +1059,11 @@ window.rrect = function (c, x, y, w, h, r) {
     if (dailyOn && s > (Number(store.get('nsh-dagbest-' + today, 0)) || 0)) store.set('nsh-dagbest-' + today, s);
     $('overTitle').textContent = record && s > 0 ? 'Nieuw record!' : 'Game over';
     $('final').textContent = s.toLocaleString('nl-NL');
+    $('chResult').hidden = !chOn();
+    if (chOn()) {
+      if (s > challenge.score) { $('overTitle').textContent = 'Uitdaging gewonnen!'; $('chResult').textContent = 'Je hebt ' + chWho() + ' verslagen (' + challenge.score.toLocaleString('nl-NL') + '). Daag ' + (challenge.from || 'je vriend') + ' nu terug uit!'; unlock('uitdager'); }
+      else $('chResult').textContent = 'Nog ' + (challenge.score - s + 1).toLocaleString('nl-NL') + ' punten tekort om ' + chWho() + ' te verslaan. Probeer het nog een keer!';
+    }
     lastName = store.get('nsh-name', '');
     $('playerName').value = lastName;
     $('saveBtn').disabled = s <= 0;
@@ -1042,26 +1081,37 @@ window.rrect = function (c, x, y, w, h, r) {
     $('shareMsg').textContent = '';
     $('shareRow').hidden = s <= 0;
     if (s <= 0) return;
-    const name = cur.name + (modeLabel() ? ' (' + modeLabel().toLowerCase() + ')' : '');
-    const url = SITE_URL + '#' + (dailyOn ? 'uitdaging' : boardId());
-    const text = dailyOn
-      ? 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in de uitdaging van vandaag (' + cur.name + ') op Nachtspeelhal. Kun jij dat verslaan?'
-      : 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in ' + name + ' op Nachtspeelhal. Kun jij dat verslaan?';
-    shareData = { title: 'Nachtspeelhal', text, url };
+    shareScore = s;
+    shareData = buildShare();
     const native = !!navigator.share && coarse;
     $('shareBtn').hidden = !native;
     $('waBtn').hidden = native;
     $('copyBtn').hidden = native;
-    $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(text + ' ' + url);
-    $('waBtn').onclick = () => { track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld'); };
+    $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(shareData.text + ' ' + shareData.url);
+    $('waBtn').onclick = () => {
+      shareData = buildShare();
+      $('waBtn').href = 'https://wa.me/?text=' + encodeURIComponent(shareData.text + ' ' + shareData.url);
+      track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld');
+    };
+  }
+  let shareScore = 0;
+  function buildShare() {
+    const s = shareScore;
+    const me = ($('playerName').value || store.get('nsh-name', '') || '').trim().replace(/\s+/g, ' ').slice(0, 16);
+    const name = cur.name + (modeLabel() ? ' (' + modeLabel().toLowerCase() + ')' : '');
+    const url = SITE_URL + '?versla=' + s + (me && !isRude(me) ? '&van=' + encodeURIComponent(me) : '') + '#' + boardId();
+    const text = 'Ik haalde ' + s.toLocaleString('nl-NL') + ' punten in ' + name + ' op Nachtspeelhal. Versla jij mij?';
+    return { title: 'Nachtspeelhal', text, url };
   }
   $('shareBtn').addEventListener('click', async () => {
     if (!shareData) return;
+    shareData = buildShare();
     try { await navigator.share(shareData); $('shareMsg').textContent = 'Gedeeld!'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld'); }
     catch (e) { if (e && e.name !== 'AbortError') $('shareMsg').textContent = 'Delen lukte niet. Kopieer de link hieronder.'; $('copyBtn').hidden = false; }
   });
   $('copyBtn').addEventListener('click', async () => {
     if (!shareData) return;
+    shareData = buildShare();
     const all = shareData.text + ' ' + shareData.url;
     try { await navigator.clipboard.writeText(all); $('shareMsg').textContent = 'Link gekopieerd. Plak hem in een bericht.'; track('rpc/track_event', { p_kind: 'gedeeld', p_game: boardId() }); unlock('gedeeld'); }
     catch (e) { $('shareMsg').textContent = all; }
@@ -1193,6 +1243,24 @@ window.rrect = function (c, x, y, w, h, r) {
     ctx.restore();
   }
 
+  function drawChallenge(dt) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.save();
+    const t = challenge.beaten ? 'Verslagen! \u2713 ' + chWho() : 'Te verslaan: ' + challenge.score.toLocaleString('nl-NL') + ' (' + chWho() + ')';
+    ctx.font = '700 13px "Atkinson Hyperlegible", system-ui, sans-serif';
+    const w = ctx.measureText(t).width + 24, x = W / 2 - w / 2, y = H - 34;
+    ctx.globalAlpha = .85;
+    rrect(ctx, x, y, w, 24, 12); ctx.fillStyle = challenge.beaten ? cur.color : 'rgba(7,11,23,.75)'; ctx.fill();
+    ctx.lineWidth = 1; ctx.strokeStyle = cur.color; ctx.stroke();
+    ctx.globalAlpha = 1; ctx.fillStyle = challenge.beaten ? '#070b17' : '#e8efe4'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(t, W / 2, y + 12.5);
+    ctx.restore();
+    if (challenge.flash > 0) {
+      challenge.flash = Math.max(0, challenge.flash - dt);
+      drawBig('Verslagen!', Math.min(1, challenge.flash), .55);
+    }
+  }
+
   function drawBig(text, alpha, scale) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.save();
@@ -1236,6 +1304,7 @@ window.rrect = function (c, x, y, w, h, r) {
       } catch (err) { drawErr = String(err && err.message || err); console.error(err); }
       try {
         if (bannerT > 0 && state !== 'intro') drawBanner();
+        if (chOn() && (state === 'playing' || state === 'countdown' || state === 'paused')) drawChallenge(elapsed);
         if (state === 'countdown') {
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
           ctx.fillStyle = 'rgba(7,11,23,.35)'; ctx.fillRect(0, 0, W, H);
@@ -1275,6 +1344,11 @@ window.rrect = function (c, x, y, w, h, r) {
 
   renderHome();
   renderDaily(); renderAch();
+  (function gameLinks() {
+    const nav = $('gameLinks'); if (!nav) return;
+    const lead = document.createElement('span'); lead.textContent = 'Over de spellen:'; nav.appendChild(lead);
+    GAMES.forEach(def => { const a = document.createElement('a'); a.href = 'spellen/' + def.id + '.html'; a.textContent = def.name; nav.appendChild(a); });
+  })();
   setInterval(() => { if (!document.hidden && state === 'home') renderDaily(); }, 60000);
   if (deepLink === 'uitdaging') { showGames(); openGame(dailyGame(today), true); }
   else if (deepLink === 'prestaties') { showGames(); setTimeout(() => $('prestaties').scrollIntoView(), 50); }
@@ -1286,7 +1360,8 @@ window.rrect = function (c, x, y, w, h, r) {
     }
   }
   // anonymous visit count: page, phone or computer, where the visitor came from, first visit or not
-  if (useSupa && !isLocal) {
+  const fromGamePage = /\/spellen\/[a-z-]+\.html/.test(document.referrer || '') && (document.referrer || '').includes(location.hostname);
+  if (useSupa && !isLocal && !fromGamePage) {
     const ref = (document.referrer || '').toLowerCase();
     const linked = GAMES.find(d => d.id === deepLink || (d.modes && d.modes.some(m => m.id === deepLink)));
     const source = ref.includes('google.') ? 'google'
